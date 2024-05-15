@@ -1,0 +1,21 @@
+[run]
+source =
+    piggywallet
+    playground
+
+omit =
+    */__init__.py
+    */settings/*
+    */migrations/*
+    */wsgi.py
+    */asgi.py
+    */urls.py
+
+[report]
+omit =
+    */__init__.py
+    */settings/*
+    */migrations/*
+    */wsgi.py
+    */asgi.py
+    */urls.py
