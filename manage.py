@@ -7,6 +7,7 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "piggywallet.settings.dev")
+    # os.environ.setdefault("DJANGO_CONFIGURATION", "piggywallet.settings.prod")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
