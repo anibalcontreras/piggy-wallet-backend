@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 django = "*"
 psycopg2-binary = "*"
+python-dotenv = "*"
 
 [dev-packages]
 flake8 = "*"
@@ -14,6 +15,8 @@ pytest = "*"
 pytest-django = "*"
 isort = "*"
 pre-commit = "*"
+coverage = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.11"
