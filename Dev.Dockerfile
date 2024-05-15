@@ -7,13 +7,13 @@ RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev postgresql-dev
 RUN apk add --no-cache netcat-openbsd
 
 # Install pipenv
-RUN pip install --upgrade pip 
+RUN pip install --upgrade pip
 RUN pip install pipenv
 
 # Install application dependencies
 COPY Pipfile Pipfile.lock /app/
 # We use the --system flag so packages are installed into the system python
-# and not into a virtualenv. Docker containers don't need virtual environments. 
+# and not into a virtualenv. Docker containers don't need virtual environments.
 RUN pipenv install --system --dev
 
 COPY . /app/
