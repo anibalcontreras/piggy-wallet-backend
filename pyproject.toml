@@ -1,0 +1,29 @@
+# Black
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+include = "\\.pyi?$"
+
+# Isort
+[tool.isort]
+profile = "black"
+
+# Flake8
+[tool.flake8]
+exclude = [".git", "__pycache__", "old", "build", "dist", "venv"]
+ignore = ["E226", "E302", "E41", "F401", "F403", "F405"]
+max-line-length = 120
+max-complexity = 10
+
+# Pytest
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "piggywallet.settings.test"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+# Coverage
+[tool.coverage.run]
+source = ["piggywallet", "playground"]
+omit = ["*/__init__.py", "*/settings/*", "*/migrations/*", "*/wsgi.py", "*/asgi.py", "*/urls.py"]
+
+[tool.coverage.report]
+omit = ["*/__init__.py", "*/settings/*", "*/migrations/*", "*/wsgi.py", "*/asgi.py", "*/urls.py"]
