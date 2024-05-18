@@ -2,15 +2,14 @@ FROM python:3.11-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev postgresql-dev
-RUN apk add --no-cache netcat-openbsd
+RUN apk add --no-cache gcc musl-dev libffi-dev postgresql-dev bash
 
 RUN pip install --upgrade pip
 RUN pip install pipenv
 
 COPY Pipfile Pipfile.lock /app/
 
-RUN pipenv install --system --dev
+RUN pipenv install --system --deploy
 
 COPY . /app/
 COPY docker-entrypoint.sh /app/

@@ -2,8 +2,8 @@ from .base import *
 import os
 from dotenv import load_dotenv
 
-# DEBUG = False
-# ALLOWED_HOSTS = ['mydomain.com']
+DEBUG = False
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 load_dotenv()
 DATABASES = {
