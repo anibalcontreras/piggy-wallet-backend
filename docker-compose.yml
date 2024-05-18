@@ -14,7 +14,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dev.Dockerfile
+      dockerfile: Dockerfile
     container_name: web
     volumes:
       - .:/app
