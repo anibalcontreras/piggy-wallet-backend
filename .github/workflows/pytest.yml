@@ -31,5 +31,7 @@ jobs:
           pip install pipenv
           pipenv install --system --dev
       - uses: pavelzw/pytest-action@v2
+        env:
+          SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         with:
           emoji: false
