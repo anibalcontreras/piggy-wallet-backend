@@ -17,6 +17,7 @@ isort = "*"
 pre-commit = "*"
 coverage = "*"
 pytest-cov = "*"
+flake8-pyproject = "*"
 
 [requires]
 python_version = "3.11"
