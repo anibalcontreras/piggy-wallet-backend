@@ -30,6 +30,12 @@ jobs:
           pip install pytest pytest-md pytest-emoji
           pip install pipenv
           pipenv install --system --dev
+      - name: Set environment variables
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        run: echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> $GITHUB_ENV
       - uses: pavelzw/pytest-action@v2
         with:
           emoji: false
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
