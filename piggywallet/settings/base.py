@@ -25,16 +25,30 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-# Application definition
 
+# Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "playground",
+    "authentication",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "authentication.services.cognito_authentication.CognitoAuthentication",
+    ],
+}
+
+# COGNITO SETTINGS
+AWS_REGION = os.getenv("AWS_REGION")
+COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
+COGNITO_APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID")
+COGNITO_APP_CLIENT_SECRET = os.getenv("COGNITO_APP_CLIENT_SECRET")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

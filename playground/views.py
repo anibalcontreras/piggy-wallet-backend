@@ -1,7 +1,7 @@
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import JsonResponse
+from authentication.decorators import cognito_authenticated
 
 
-# Create your views here.
+@cognito_authenticated
 def hello_world(request):
-    return HttpResponse("Hello World!")
+    return JsonResponse({"message": "Hello, world!"})
