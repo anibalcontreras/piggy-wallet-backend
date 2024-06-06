@@ -3,6 +3,7 @@ from botocore.exceptions import ClientError
 import hmac
 import hashlib
 import base64
+from django.contrib.auth import get_user_model
 
 
 class CognitoService:
@@ -31,6 +32,11 @@ class CognitoService:
                     {"Name": "phone_number", "Value": phone},
                     {"Name": "email", "Value": email},
                 ],
+            )
+            cognito_uuid = response["UserSub"]
+            User = get_user_model()
+            User.objects.create_user(
+                username=email, email=email, password=password, first_name=name, phone=phone, uuid=cognito_uuid
             )
             return response
         except ClientError as e:
