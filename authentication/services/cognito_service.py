@@ -36,7 +36,7 @@ class CognitoService:
             cognito_uuid = response["UserSub"]
             User = get_user_model()
             User.objects.create_user(
-                username=email, email=email, password=password, first_name=name, phone=phone, uuid=cognito_uuid
+                username=email, email=email, password=password, first_name=name, phone=phone, user_id=cognito_uuid
             )
             return response
         except ClientError as e:
