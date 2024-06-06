@@ -23,17 +23,12 @@ class CognitoAuthentication(authentication.BaseAuthentication):
             payload = jwt.decode(token, signing_key.key, algorithms=["RS256"], aud=settings.COGNITO_APP_CLIENT_ID)
             return (payload, None)
         except PyJWKSetError as e:
-            print(f"JWK Set Error: {e}")
-            raise exceptions.AuthenticationFailed("JWK Set did not contain any usable keys")
+            raise exceptions.AuthenticationFailed(f"JWK Set did not contain any usable keys: {e}")
         except jwt.ExpiredSignatureError as e:
-            print(f"Expired Signature Error: {e}")
-            raise exceptions.AuthenticationFailed("Token has expired")
+            raise exceptions.AuthenticationFailed(f"Token has expired: {e}")
         except jwt.DecodeError as e:
-            print(f"Decode Error: {e}")
             raise exceptions.AuthenticationFailed(f"Error decoding token: {e}")
         except jwt.InvalidTokenError as e:
-            print(f"Invalid Token Error: {e}")
             raise exceptions.AuthenticationFailed(f"Invalid token: {e}")
         except Exception as e:
-            print(f"Unhandled Exception: {e}")
             raise exceptions.AuthenticationFailed(f"Unhandled exception: {e}")
