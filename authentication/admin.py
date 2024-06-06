@@ -8,8 +8,9 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (_("Personal info"), {"fields": ("first_name", "last_name", "email", "phone")}),
+        (_("Important dates"), {"fields": ("last_login", "date_joined", "created_at", "updated_at")}),
         (_("Permissions"), {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Status"), {"fields": ("enabled",)}),
     )
     add_fieldsets = (
         (
@@ -20,8 +21,19 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
-    list_display = ("username", "email", "first_name", "last_name", "is_staff", "phone", "uuid")
-    search_fields = ("username", "first_name", "last_name", "email", "phone", "uuid")
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "phone",
+        "user_id",
+        "enabled",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = ("username", "first_name", "last_name", "email", "phone", "user_id")
     ordering = ("username",)
 
 

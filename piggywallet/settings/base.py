@@ -27,6 +27,12 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 AUTH_USER_MODEL = "authentication.User"
 
+# COGNITO SETTINGS
+AWS_REGION = os.getenv("AWS_REGION")
+COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
+COGNITO_APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID")
+COGNITO_APP_CLIENT_SECRET = os.getenv("COGNITO_APP_CLIENT_SECRET")
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -47,11 +53,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-# COGNITO SETTINGS
-AWS_REGION = os.getenv("AWS_REGION")
-COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
-COGNITO_APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID")
-COGNITO_APP_CLIENT_SECRET = os.getenv("COGNITO_APP_CLIENT_SECRET")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -115,7 +116,7 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
