@@ -23,6 +23,7 @@ pre-commit = "*"
 coverage = "*"
 pytest-cov = "*"
 flake8-pyproject = "*"
+factory-boy = "*"
 
 [requires]
 python_version = "3.11"
