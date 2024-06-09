@@ -1,0 +1,38 @@
+version: 0.0
+os: linux
+
+# In this case we copy all the files of the project to the EC2
+files:
+  - source: /
+    destination: /home/ubuntu/api
+
+# If a file already exists in the destination, it will be OVERWRITTEN
+file_exists_behavior: OVERWRITE
+
+# 
+hooks:
+  # First the CodeDeploy agent stops the application
+  ApplicationStop:
+    - location: scripts/application_stop.sh
+      timeout: 100
+      runas: ubuntu
+      overwrite: true
+  # The isntall the service (Copy the revision files to the EC2)
+  # So we can run after install scripts for example for configuration
+  AfterInstall:
+    - location: scripts/after_install.sh
+      timeout: 100
+      runas: ubuntu
+      overwrite: true
+  # Then Start the service
+  ApplicationStart:
+    - location: scripts/application_start.sh
+      timeout: 100
+      runas: ubuntu
+      overwrite: true
+  # Finally we validate the deployment with a script
+  ValidateService:
+    - location: scripts/validate_service.sh
+      timeout: 100
+      runas: ubuntu
+      overwrite: true
