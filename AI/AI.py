@@ -37,14 +37,12 @@ with open("AI/sets/gastos.csv", mode="r", encoding="utf-8") as archivo:
     for fila in lector:
         texto = fila["gasto"]  # Asegurarse de leer la columna 'gasto'
         categoría = clasificar_texto(texto)
-        gastos_clasificados.append({"id": fila["id"],
-                                    "gasto": texto, "categoría": categoría})
+        gastos_clasificados.append({"id": fila["id"], "gasto": texto, "categoría": categoría})
         print(f"Texto: {texto}\nCategoría Predicha: {categoría}\n")
 
 
 # Guardar las respuestas en un archivo CSV
-with open("AI/sets/gastos_clasificados.csv", mode="w", encoding="utf-8",
-          newline="") as archivo:
+with open("AI/sets/gastos_clasificados.csv", mode="w", encoding="utf-8", newline="") as archivo:
     fieldnames = ["id", "gasto", "categoría"]
     escritor = csv.DictWriter(archivo, fieldnames=fieldnames)
     escritor.writeheader()
@@ -80,8 +78,7 @@ def limpiar_categoria(categoria):
 
 # Leer los datos del archivo CSV existente
 gastos_clasificados = []
-with open("AI/sets/gastos_clasificados.csv", mode="r",
-          encoding="utf-8") as archivo:
+with open("AI/sets/gastos_clasificados.csv", mode="r", encoding="utf-8") as archivo:
     lector = csv.DictReader(archivo)
     for fila in lector:
         gastos_clasificados.append(fila)
@@ -94,8 +91,7 @@ for gasto in gastos_clasificados:
         print(e)
 
 # Guardar las respuestas en un nuevo archivo CSV
-with open("AI/sets/gastos_clasificados_procesados.csv", mode="w",
-          encoding="utf-8", newline="") as archivo:
+with open("AI/sets/gastos_clasificados_procesados.csv", mode="w", encoding="utf-8", newline="") as archivo:
     fieldnames = ["id", "gasto", "categoría"]
     escritor = csv.DictWriter(archivo, fieldnames=fieldnames)
     escritor.writeheader()

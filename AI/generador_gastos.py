@@ -67,8 +67,7 @@ datos = [
     {"id": 63, "gasto": "Apertura de una nueva cuenta de ahorros"},
     {"id": 64, "gasto": "Transferencia al fondo de emergencia"},
     {"id": 65, "gasto": "Pago al plan de ahorro para la jubilación"},
-    {"id": 66,
-     "gasto": "Depósito en la cuenta de ahorros para la universidad"},
+    {"id": 66, "gasto": "Depósito en la cuenta de ahorros para la universidad"},
     {"id": 67, "gasto": "Transferencia al fondo de ahorro para la casa"},
     {"id": 68, "gasto": "Depósito en el certificado de depósito"},
     {"id": 69, "gasto": "Pago al plan de ahorro automático mensual"},
@@ -86,8 +85,7 @@ datos = [
 ]
 
 # Escribir los datos en un archivo CSV
-with open("AI/sets/gastos.csv",
-          mode="w", encoding="utf-8", newline="") as archivo:
+with open("AI/sets/gastos.csv", mode="w", encoding="utf-8", newline="") as archivo:
     escritor = csv.DictWriter(archivo, fieldnames=["id", "gasto"])
     escritor.writeheader()
     escritor.writerows(datos)
