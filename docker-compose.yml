@@ -6,14 +6,10 @@ services:
     image: postgres:latest
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     networks:
       - app_network
-    environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
 
   web:
     build:

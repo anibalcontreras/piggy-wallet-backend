@@ -2,4 +2,4 @@
 cd /home/ubuntu/api
 
 echo "Stopping service ..."
-docker compose down
+sudo docker compose down
