@@ -23,4 +23,5 @@ urlpatterns = [
     path("auth/", include("authentication.urls")),
     path("playground/", include("playground.urls")),
     path("budget/", include("budget.urls")),
+    path("expense-types/", include("user_expense_type.urls")),
 ]
