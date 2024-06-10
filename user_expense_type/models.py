@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+
 class UserExpenseType(models.Model):
     id = models.AutoField(primary_key=True)
     username = models.UUIDField()
