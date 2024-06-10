@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "authentication",
     "budget",
     "user_expense_type",
+    "categories",
 ]
 
 REST_FRAMEWORK = {
