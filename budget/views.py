@@ -1,85 +1,82 @@
-# budget/views.py
-from django.shortcuts import render
-from django.http import JsonResponse
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 from .models import Budget
-from django.views.decorators.csrf import csrf_exempt
-import json
+from .serializers import BudgetSerializer
+from authentication.decorators import cognito_authenticated
+import jwt
 
 
-@csrf_exempt
-def get_user_budget(request):
-    if request.method == "GET":
+class BudgetViewSet(viewsets.ViewSet):
+    def get_user_id_from_token(self, request):
         try:
-            user_id = request.GET.get("user_id")
+            authorization_header = request.headers.get("Authorization")
+            if not authorization_header:
+                raise Exception("Authorization header not found")
+
+            token = authorization_header.split()[1]
+            decoded_token = jwt.decode(token, options={"verify_signature": False})
+            user_id = decoded_token.get("username")
             if not user_id:
-                return JsonResponse({"error": "User ID is required in the query parameters."}, status=400)
-
-            budget = Budget.objects.get(user_id=user_id)
-            return JsonResponse({"user_id": int(user_id), "amount": budget.amount})
-        except Budget.DoesNotExist:
-            return JsonResponse({"error": "Budget not found"}, status=404)
-    else:
-        return JsonResponse({"error": "Invalid request method."}, status=405)
-
-
-@csrf_exempt
-def set_user_budget(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            user_id = data.get("user_id")
-            amount = data.get("amount")
-
-            if not user_id or not amount:
-                return JsonResponse({"error": "User ID and amount are required."}, status=400)
-
-            budget = Budget.objects.create(user_id=user_id, amount=amount)
-            budget.save()
-
-            return JsonResponse({"message": "Budget created successfully."}, status=201)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON."}, status=400)
+                raise Exception("User ID not found in token")
+            return user_id
+        except jwt.DecodeError:
+            raise Exception("Invalid token")
+        except jwt.ExpiredSignatureError:
+            raise Exception("Expired token")
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-    else:
-        return JsonResponse({"error": "Invalid request method."}, status=405)
+            raise Exception(f"Error decoding token: {e}")
 
-
-@csrf_exempt
-def delete_user_budget(request):
-    if request.method == "DELETE":
+    @cognito_authenticated
+    def list(self, request):
         try:
-            data = json.loads(request.body)
-            user_id = data.get("user_id")
+            username = self.get_user_id_from_token(request)
+            budget = Budget.objects.get(username=username)
+            serializer = BudgetSerializer(budget)
+            return Response(serializer.data)
+        except Budget.DoesNotExist:
+            return Response({"error": "Budget not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            budget = Budget.objects.get(user_id=user_id)
+    @cognito_authenticated
+    def create(self, request):
+        try:
+            user_id = self.get_user_id_from_token(request)
+            data = request.data.copy()
+            data["username"] = user_id
+
+            serializer = BudgetSerializer(data=data)
+            print(serializer)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @cognito_authenticated
+    def destroy(self, request):
+        try:
+            username = self.get_user_id_from_token(request)
+            budget = Budget.objects.get(username=username)
             budget.delete()
-
-            return JsonResponse({"message": "Budget deleted successfully", "user_id": user_id})
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except Budget.DoesNotExist:
-            return JsonResponse({"error": "Budget not found"}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=400)
-    else:
-        return JsonResponse({"error": "Invalid request method."}, status=405)
+            return Response({"error": "Budget not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-@csrf_exempt
-def update_user_budget(request):
-    if request.method == "PATCH":
+    @cognito_authenticated
+    def partial_update(self, request):
         try:
-            data = json.loads(request.body)
-            user_id = data.get("user_id")
-            amount = data.get("amount")
-
-            budget = Budget.objects.get(user_id=user_id)
-            budget.amount = amount
-            budget.save()
-
-            return JsonResponse({"user_id": user_id, "budget": budget.amount})
+            username = self.get_user_id_from_token(request)
+            budget = Budget.objects.get(username=username)
+            serializer = BudgetSerializer(budget, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Budget.DoesNotExist:
-            return JsonResponse({"error": "Budget not found"}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=400)
-    else:
-        return JsonResponse({"error": "Invalid request method."}, status=405)
+            return Response({"error": "Budget not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
