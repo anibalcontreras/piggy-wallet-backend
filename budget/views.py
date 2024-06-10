@@ -5,21 +5,22 @@ from .models import Budget
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+
 @csrf_exempt
 def get_user_budget(request):
     if request.method == 'GET':
         try:
-            data = json.loads(request.body)
-            user_id = data.get('user_id')
+            user_id = request.GET.get('user_id')
             if not user_id:
                 return JsonResponse({'error': 'User ID is required in the query parameters.'}, status=400)
                 
             budget = Budget.objects.get(user_id=user_id)
-            return JsonResponse({'user_id': user_id, 'amount': budget.amount})
+            return JsonResponse({'user_id': int(user_id), 'amount': budget.amount})
         except Budget.DoesNotExist:
             return JsonResponse({'error': 'Budget not found'}, status=404)
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 @csrf_exempt
 def set_user_budget(request):
