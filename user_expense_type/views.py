@@ -1,135 +1,84 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 from .models import UserExpenseType
-from django.views.decorators.csrf import csrf_exempt
-import json
+from .serializers import UserExpenseTypeSerializer
+from authentication.decorators import cognito_authenticated
+import jwt
 
 
-@csrf_exempt
-def get_user_expense_types(request):
-    if request.method == 'GET':
+class UserExpenseTypeViewSet(viewsets.ViewSet):
+    def get_user_id_from_token(self, request):
         try:
-            data = json.loads(request.body)
-            user_id = data.get('user_id')
-            if not user_id:
-                return JsonResponse({'error': 'User ID is required in the query parameters.'}, status=400)
-                
-            user_expense_types = UserExpenseType.objects.filter(user_id=user_id)
-            if not user_expense_types.exists():
-                return JsonResponse({'error': 'User Expense Types not found'}, status=404)
-            
-            # Serializing the list of user expense types
-            expense_types_list = [
-                {
-                    'id': expense_type.id,
-                    'user_id': expense_type.user_id,
-                    'name': expense_type.name,
-                    'description': expense_type.description,
-                    'set_by_user': expense_type.set_by_user,
-                    'category_name': expense_type.category_name,
-                    'created_at': expense_type.created_at,
-                    'updated_at': expense_type.updated_at
-                } for expense_type in user_expense_types
-            ]
-            
-            return JsonResponse(expense_types_list, safe=False)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=405)
-    
-@csrf_exempt
-def get_user_expense_type_by_name(request, name):
-    if request.method == 'GET':
-        try:
-            data = json.loads(request.body)
-            user_id = data.get('user_id')
-            if not user_id:
-                return JsonResponse({'error': 'User ID is required in the query parameters.'}, status=400)
-            
-            user_expense_type = UserExpenseType.objects.get(user_id=user_id, name=name)
-            return JsonResponse({
-                'id': user_expense_type.id,
-                'user_id': user_expense_type.user_id,
-                'name': user_expense_type.name,
-                'description': user_expense_type.description,
-                'set_by_user': user_expense_type.set_by_user,
-                'category_name': user_expense_type.category_name,
-                'created_at': user_expense_type.created_at,
-                'updated_at': user_expense_type.updated_at
-            })
-        except UserExpenseType.DoesNotExist:
-            return JsonResponse({'error': 'User Expense Type not found'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=405)
-    
-@csrf_exempt
-def create_user_expense_type(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user_id = data.get('user_id')
-            name = data.get('name')
-            description = data.get('description')
-            set_by_user = data.get('set_by_user')
-            category_name = data.get('category_name')
-            
-            if not user_id or not name or not category_name:
-                return JsonResponse({'error': 'User ID, Name, and Category Name are required.'}, status=400)
-            
-            user_expense_type = UserExpenseType.objects.create(
-                user_id=user_id, name=name, description=description, set_by_user=set_by_user, category_name=category_name
-            )
-            user_expense_type.save()
-            
-            return JsonResponse({'message': 'User Expense Type created successfully.'}, status=201)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
+            authorization_header = request.headers.get("Authorization")
+            if not authorization_header:
+                raise Exception("Authorization header not found")
+
+            token = authorization_header.split()[1]
+            decoded_token = jwt.decode(token, options={"verify_signature": False})
+            username = decoded_token.get("username")
+            if not username:
+                raise Exception("User ID not found in token")
+            return username
+        except jwt.DecodeError:
+            raise Exception("Invalid token")
+        except jwt.ExpiredSignatureError:
+            raise Exception("Expired token")
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+            raise Exception(f"Error decoding token: {e}")
 
-@csrf_exempt
-def update_user_expense_type(request, name):
-    if request.method == 'PATCH':
+    @cognito_authenticated
+    def list(self, request):
         try:
-            data = json.loads(request.body)
-            user_id = data.get('user_id')
-            description = data.get('description')
-            set_by_user = data.get('set_by_user')
-            category_name = data.get('category_name')
-            
-            user_expense_type = UserExpenseType.objects.get(user_id=user_id, name=name)
-            user_expense_type.description = description
-            user_expense_type.set_by_user = set_by_user
-            user_expense_type.category_name = category_name
-            user_expense_type.save()
-            
-            return JsonResponse({'message': 'User Expense Type updated successfully.'})
+            username = self.get_user_id_from_token(request)
+            user_expense_types = UserExpenseType.objects.filter(username=username)
+            serializer = UserExpenseTypeSerializer(user_expense_types, many=True)
+            return Response(serializer.data)
         except UserExpenseType.DoesNotExist:
-            return JsonResponse({'error': 'User Expense Type not found'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=405)
-    
-@csrf_exempt
-def delete_user_expense_type(request, name):
-    if request.method == 'DELETE':
+            return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    @cognito_authenticated
+    def create(self, request):
         try:
-            data = json.loads(request.body)
-            user_id = data.get('user_id')
-            
-            user_expense_type = UserExpenseType.objects.get(user_id=user_id, name=name)
+            username = self.get_user_id_from_token(request)
+            data = request.data.copy()
+            data["username"] = username
+
+            serializer = UserExpenseTypeSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @cognito_authenticated
+    def destroy(self, request):
+        try:
+            username = self.get_user_id_from_token(request)
+            id = request.data.get("id")
+            user_expense_type = UserExpenseType.objects.get(id=id, username=username)
             user_expense_type.delete()
-            
-            return JsonResponse({'message': 'User Expense Type deleted successfully.'})
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except UserExpenseType.DoesNotExist:
-            return JsonResponse({'error': 'User Expense Type not found'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+            return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @cognito_authenticated
+    def partial_update(self, request):
+        try:
+            username = self.get_user_id_from_token(request)
+            id = request.data.get("id")
+            user_expense_type = UserExpenseType.objects.get(id=id, username=username)
+            serializer = UserExpenseTypeSerializer(user_expense_type, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except UserExpenseType.DoesNotExist:
+            return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
