@@ -17,7 +17,7 @@ class UserExpenseTypeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return UserExpenseType.objects.create(**validated_data)
-    
+
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
         instance.description = validated_data.get("description", instance.description)
