@@ -30,7 +30,7 @@ class BudgetViewSet(viewsets.ViewSet):
     def list(self, request):
         try:
             username = self.get_user_id_from_token(request)
-            budget = Budget.objects.filter(username=username).order_by('-created_at').first()
+            budget = Budget.objects.filter(username=username).order_by("-created_at").first()
             serializer = BudgetSerializer(budget)
             return Response(serializer.data)
         except Budget.DoesNotExist:
@@ -58,7 +58,7 @@ class BudgetViewSet(viewsets.ViewSet):
     def destroy(self, request):
         try:
             username = self.get_user_id_from_token(request)
-            budget = Budget.objects.filter(username=username).order_by('-created_at').first()
+            budget = Budget.objects.filter(username=username).order_by("-created_at").first()
             budget.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Budget.DoesNotExist:
@@ -70,7 +70,7 @@ class BudgetViewSet(viewsets.ViewSet):
     def partial_update(self, request):
         try:
             username = self.get_user_id_from_token(request)
-            budget = Budget.objects.filter(username=username).order_by('-created_at').first()
+            budget = Budget.objects.filter(username=username).order_by("-created_at").first()
             serializer = BudgetSerializer(budget, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
