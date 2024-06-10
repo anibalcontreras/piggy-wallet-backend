@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "playground",
     "authentication",
     "budget",
+    "user_expense_type",
 ]
 
 REST_FRAMEWORK = {
