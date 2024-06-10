@@ -86,8 +86,8 @@ datos = [
 ]
 
 # Escribir los datos en un archivo CSV
-with open('AI/sets/gastos.csv', mode='w', encoding='utf-8',
-          newline='') as archivo:
+with open("AI/sets/gastos.csv",
+          mode="w", encoding="utf-8", newline="") as archivo:
     escritor = csv.DictWriter(archivo, fieldnames=["id", "gasto"])
     escritor.writeheader()
     escritor.writerows(datos)

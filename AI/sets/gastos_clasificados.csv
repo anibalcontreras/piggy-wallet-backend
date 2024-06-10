@@ -57,14 +57,14 @@ id,gasto,categoría
 56,Compré un videojuego nuevo,entretenimiento
 57,Alquiler de una película en línea,entretenimiento
 58,Pago del servicio de cable,entretenimiento
-59,Compré un libro de aventuras,educación
+59,Compré un libro de aventuras,entretenimiento
 60,Pago del club social mensual,entretenimiento
 61,Depósito en la cuenta de ahorros,ahorro
 62,Transferencia a la cuenta de ahorros a largo plazo,ahorro
 63,Apertura de una nueva cuenta de ahorros,ahorro
 64,Transferencia al fondo de emergencia,ahorro
 65,Pago al plan de ahorro para la jubilación,ahorro
-66,Depósito en la cuenta de ahorros para la      universidad,ahorro
+66,Depósito en la cuenta de ahorros para la universidad,ahorro
 67,Transferencia al fondo de ahorro para la casa,ahorro
 68,Depósito en el certificado de depósito,inversión
 69,Pago al plan de ahorro automático mensual,ahorro
