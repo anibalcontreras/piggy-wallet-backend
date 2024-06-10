@@ -8,3 +8,8 @@ class BudgetSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         return Budget.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.amount = validated_data.get("amount", instance.amount)
+        instance.save()
+        return instance
