@@ -9,12 +9,6 @@ class UserExpenseTypeSerializer(serializers.ModelSerializer):
         model = UserExpenseType
         fields = "__all__"
 
-    # username = serializers.UUIDField()
-    # name = serializers.CharField(max_length=70, default="Personal")
-    # description = serializers.CharField(max_length=255, allow_blank=True, allow_null=True)
-    # set_by_user = serializers.BooleanField(default=False)
-    # category_name = serializers.CharField(max_length=70)
-
     def create(self, validated_data):
         return UserExpenseType.objects.create(**validated_data)
 
@@ -22,6 +16,5 @@ class UserExpenseTypeSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get("name", instance.name)
         instance.description = validated_data.get("description", instance.description)
         instance.set_by_user = validated_data.get("set_by_user", instance.set_by_user)
-        instance.category_name = validated_data.get("category_name", instance.category_name)
         instance.save()
         return instance

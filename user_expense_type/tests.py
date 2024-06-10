@@ -15,7 +15,6 @@ class UserExpenseTypeViewSetTestCase(TestCase):
             "name": "Viajes",
             "description": "Gastos incurridos en viajes",
             "set_by_user": True,
-            "category_name": "Transport",
         }
 
     @patch.object(UserExpenseTypeViewSet, "create")
@@ -76,7 +75,6 @@ class UserExpenseTypeViewSetTestCase(TestCase):
             "name": "Viajes",
             "description": "Gastos incurridos en viajes por placer",
             "set_by_user": True,
-            "category_name": "Transport",
         }
         mock_partial_update.return_value = Response(status=status.HTTP_200_OK, data=new_user_expense_type_data)
 
