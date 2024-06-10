@@ -13,7 +13,7 @@ def get_user_budget(request):
             user_id = request.GET.get('user_id')
             if not user_id:
                 return JsonResponse({'error': 'User ID is required in the query parameters.'}, status=400)
-                
+
             budget = Budget.objects.get(user_id=user_id)
             return JsonResponse({'user_id': int(user_id), 'amount': budget.amount})
         except Budget.DoesNotExist:
@@ -29,13 +29,13 @@ def set_user_budget(request):
             data = json.loads(request.body)
             user_id = data.get('user_id')
             amount = data.get('amount')
-            
+
             if not user_id or not amount:
                 return JsonResponse({'error': 'User ID and amount are required.'}, status=400)
-            
+
             budget = Budget.objects.create(user_id=user_id, amount=amount)
             budget.save()
-            
+
             return JsonResponse({'message': 'Budget created successfully.'}, status=201)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON.'}, status=400)
@@ -50,10 +50,10 @@ def delete_user_budget(request):
         try:
             data = json.loads(request.body)
             user_id = data.get('user_id')
-            
+
             budget = Budget.objects.get(user_id=user_id)
             budget.delete()
-            
+
             return JsonResponse({'message': 'Budget deleted successfully', 'user_id': user_id})
         except Budget.DoesNotExist:
             return JsonResponse({'error': 'Budget not found'}, status=404)
@@ -61,7 +61,7 @@ def delete_user_budget(request):
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
-    
+
 @csrf_exempt
 def update_user_budget(request):
     if request.method == 'PATCH':
@@ -69,11 +69,11 @@ def update_user_budget(request):
             data = json.loads(request.body)
             user_id = data.get('user_id')
             amount = data.get('amount')
-            
+
             budget = Budget.objects.get(user_id=user_id)
             budget.amount = amount
             budget.save()
-            
+
             return JsonResponse({'user_id': user_id, 'budget': budget.amount})
         except Budget.DoesNotExist:
             return JsonResponse({'error': 'Budget not found'}, status=404)

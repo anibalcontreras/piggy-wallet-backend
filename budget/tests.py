@@ -21,7 +21,8 @@ class BudgetTests(TestCase):
     def test_set_user_budget(self):
         url = reverse('set_user_budget')
         user = get_user_model().objects.create_user(username='testuser2', password='password')
-        response = self.client.post(url, json.dumps({'user_id': user.id, 'amount': 200}), content_type='application/json')
+        response = self.client.post(url, json.dumps({'user_id': user.id, 'amount': 200}),
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {'message': 'Budget created successfully.'})
         self.assertEqual(Budget.objects.get(user=user).amount, 200)
@@ -35,7 +36,8 @@ class BudgetTests(TestCase):
 
     def test_update_user_budget(self):
         url = reverse('update_user_budget')
-        response = self.client.patch(url, json.dumps({'user_id': self.user.id, 'amount': 300}), content_type='application/json')
+        response = self.client.patch(url, json.dumps({'user_id': self.user.id, 'amount': 300}),
+                                     content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'user_id': self.user.id, 'budget': 300})
         self.assertEqual(Budget.objects.get(user=self.user).amount, 300)
