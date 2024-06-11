@@ -1,14 +1,14 @@
 import openai
-import csv
-
-# Configura tu clave de API
-openai.api_key = "sk-proj-lMG0YGTdNOkWQhp3K3G9T3BlbkFJjW7V2xon9PuLiKNtrKPn"
+import os
 
 
-# Definir la función de clasificación de texto
-def clasificar_texto(texto):
-    respuesta = openai.ChatCompletion.create(
-        model="gpt-4-turbo",  # Utiliza el modelo adecuado
+def setup_api_key():
+    openai.api_key = os.environ["OPENAI_KEY"]
+
+
+def classify_text(texto):
+    response = openai.ChatCompletion.create(
+        model="gpt-4-turbo",
         messages=[
             {
                 "role": "system",
@@ -26,41 +26,17 @@ def clasificar_texto(texto):
         max_tokens=15,
         temperature=0,
     )
-    categoría = respuesta.choices[0].message["content"].strip()
-    return categoría
+    category = response.choices[0].message["content"].strip()
+    return category
 
 
-# Leer el archivo CSV y clasificar cada texto
-gastos_clasificados = []
-with open("AI/sets/gastos.csv", mode="r", encoding="utf-8") as archivo:
-    lector = csv.DictReader(archivo)
-    for fila in lector:
-        texto = fila["gasto"]  # Asegurarse de leer la columna 'gasto'
-        categoría = clasificar_texto(texto)
-        gastos_clasificados.append({"id": fila["id"], "gasto": texto, "categoría": categoría})
-        print(f"Texto: {texto}\nCategoría Predicha: {categoría}\n")
-
-
-# Guardar las respuestas en un archivo CSV
-with open("AI/sets/gastos_clasificados.csv", mode="w", encoding="utf-8", newline="") as archivo:
-    fieldnames = ["id", "gasto", "categoría"]
-    escritor = csv.DictWriter(archivo, fieldnames=fieldnames)
-    escritor.writeheader()
-    escritor.writerows(gastos_clasificados)
-
-
-# Definir la función de limpieza de categorías
-def limpiar_categoria(categoria):
-    # Eliminar el prefijo "categoría: " si está presente
-    if categoria.lower().startswith("categoría: "):
-        categoria = categoria[11:]
-    # Eliminar el punto final si está presente
-    if categoria.endswith("."):
-        categoria = categoria[:-1]
-    # Capitalizar la primera letra si está en minúscula
-    categoria = categoria.capitalize()
-    # Lista de categorías permitidas
-    categorias_permitidas = [
+def clean_category(category):
+    if category.lower().startswith("categoría: "):
+        category = category[11:]
+    if category.endswith("."):
+        category = category[:-1]
+    category = category.capitalize()
+    categories_allowed = [
         "Comida",
         "Transporte",
         "Vivienda",
@@ -70,29 +46,6 @@ def limpiar_categoria(categoria):
         "Ahorro",
         "Inversión",
     ]
-    # Verificar si la categoría es permitida
-    if categoria not in categorias_permitidas:
-        raise ValueError(f"Categoría no permitida: {categoria}")
-    return categoria
-
-
-# Leer los datos del archivo CSV existente
-gastos_clasificados = []
-with open("AI/sets/gastos_clasificados.csv", mode="r", encoding="utf-8") as archivo:
-    lector = csv.DictReader(archivo)
-    for fila in lector:
-        gastos_clasificados.append(fila)
-
-# Procesar cada categoría
-for gasto in gastos_clasificados:
-    try:
-        gasto["categoría"] = limpiar_categoria(gasto["categoría"])
-    except ValueError as e:
-        print(e)
-
-# Guardar las respuestas en un nuevo archivo CSV
-with open("AI/sets/gastos_clasificados_procesados.csv", mode="w", encoding="utf-8", newline="") as archivo:
-    fieldnames = ["id", "gasto", "categoría"]
-    escritor = csv.DictWriter(archivo, fieldnames=fieldnames)
-    escritor.writeheader()
-    escritor.writerows(gastos_clasificados)
+    if category not in categories_allowed:
+        raise ValueError(f"Categoría no permitida: {category}")
+    return category
