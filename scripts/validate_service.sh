@@ -1,4 +1,4 @@
 # !/bin/bash
-cd /home/ubuntu/api
+cd /home/ubuntu/piggy-wallet-backend
 
 echo "Validating service is Up ..."
