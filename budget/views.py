@@ -32,7 +32,7 @@ class BudgetViewSet(viewsets.ViewSet):
             username = self.get_user_id_from_token(request)
             budget = Budget.objects.filter(username=username).order_by("-created_at").first()
             serializer = BudgetSerializer(budget)
-            return Response(serializer.data)
+            return Response(data={"amount": serializer.data["amount"]})
         except Budget.DoesNotExist:
             return Response({"error": "Budget not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -49,7 +49,7 @@ class BudgetViewSet(viewsets.ViewSet):
             print(serializer)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(data={"amount": serializer.data["amount"]}, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -74,7 +74,7 @@ class BudgetViewSet(viewsets.ViewSet):
             serializer = BudgetSerializer(budget, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                return Response(data={"amount": serializer.data["amount"]})
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Budget.DoesNotExist:
             return Response({"error": "Budget not found"}, status=status.HTTP_404_NOT_FOUND)
