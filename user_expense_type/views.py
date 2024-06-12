@@ -32,7 +32,11 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             username = self.get_user_id_from_token(request)
             user_expense_types = UserExpenseType.objects.filter(username=username)
             serializer = UserExpenseTypeSerializer(user_expense_types, many=True)
-            return Response(serializer.data)
+            for ser in serializer.data:
+                ser.pop("username")
+                ser.pop("created_at")
+                ser.pop("updated_at")
+            return Response(data=serializer.data)
         except UserExpenseType.DoesNotExist:
             return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -48,7 +52,12 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             serializer = UserExpenseTypeSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                response = {
+                    "name": serializer.data["name"],
+                    "description": serializer.data["description"],
+                    "set_by_user": serializer.data["set_by_user"],
+                }
+                return Response(data=response, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -75,7 +84,12 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             serializer = UserExpenseTypeSerializer(user_expense_type, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                response = {
+                    "name": serializer.data["name"],
+                    "description": serializer.data["description"],
+                    "set_by_user": serializer.data["set_by_user"],
+                }
+                return Response(data=response)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except UserExpenseType.DoesNotExist:
             return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
