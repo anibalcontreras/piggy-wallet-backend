@@ -7,14 +7,27 @@ from .services.cognito_authentication import CognitoAuthentication
 
 def cognito_authenticated(func):
     @wraps(func)
-    @api_view(["GET", "POST", "PUT", "DELETE"])
-    @authentication_classes([CognitoAuthentication])
-    def wrapper(request, *args, **kwargs):
-        if not request.user or not hasattr(request.user, "get"):
+    def wrapper(self, request, *args, **kwargs):
+        auth = CognitoAuthentication()
+        try:
+            result = auth.authenticate(request)
+            if result is None:
+                return Response(
+                    {"error": "Authentication credentials were not provided or are invalid."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            user, auth_error = result
+            if auth_error or not user:
+                return Response(
+                    {"error": "Authentication credentials were not provided or are invalid."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            request.user = user
+            return func(self, request, *args, **kwargs)
+        except Exception as e:
             return Response(
-                {"error": "Authentication credentials were not provided or are invalid."},
-                status=status.HTTP_401_UNAUTHORIZED,
+                {"error": f"Authentication failed: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        return func(request, *args, **kwargs)
 
     return wrapper
