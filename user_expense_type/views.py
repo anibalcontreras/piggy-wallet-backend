@@ -41,7 +41,7 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
     @cognito_authenticated
     def retrieve(self, request, pk=None):
         try:
@@ -80,7 +80,7 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @cognito_authenticated
-    def destroy(self, request, pk=None ):
+    def destroy(self, request, pk=None):
         try:
             username = self.get_user_id_from_token(request)
             user_expense_type = UserExpenseType.objects.get(id=pk, username=username)
