@@ -41,6 +41,23 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    @cognito_authenticated
+    def retrieve(self, request, pk=None):
+        try:
+            username = self.get_user_id_from_token(request)
+            user_expense_type = UserExpenseType.objects.get(id=pk, username=username)
+            serializer = UserExpenseTypeSerializer(user_expense_type)
+            response = {
+                "name": serializer.data["name"],
+                "description": serializer.data["description"],
+                "set_by_user": serializer.data["set_by_user"],
+            }
+            return Response(data=response)
+        except UserExpenseType.DoesNotExist:
+            return Response({"error": "UserExpenseType not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @cognito_authenticated
     def create(self, request):
@@ -63,11 +80,10 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @cognito_authenticated
-    def destroy(self, request):
+    def destroy(self, request, pk=None ):
         try:
             username = self.get_user_id_from_token(request)
-            id = request.data.get("id")
-            user_expense_type = UserExpenseType.objects.get(id=id, username=username)
+            user_expense_type = UserExpenseType.objects.get(id=pk, username=username)
             user_expense_type.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except UserExpenseType.DoesNotExist:
@@ -76,11 +92,10 @@ class UserExpenseTypeViewSet(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @cognito_authenticated
-    def partial_update(self, request):
+    def partial_update(self, request, pk=None):
         try:
             username = self.get_user_id_from_token(request)
-            id = request.data.get("id")
-            user_expense_type = UserExpenseType.objects.get(id=id, username=username)
+            user_expense_type = UserExpenseType.objects.get(id=pk, username=username)
             serializer = UserExpenseTypeSerializer(user_expense_type, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()

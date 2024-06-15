@@ -25,10 +25,10 @@ class UserExpenseTypeViewSetTestCase(TestCase):
         }
         mock_create.return_value = Response(status=status.HTTP_201_CREATED, data=self.user_expense_type_data)
 
-        request = self.client.post("/expense-types/", self.user_expense_type_data)
+        request = self.client.post("/user_expense_type/", self.user_expense_type_data)
         request.headers["Authorization"] = "Bearer mock_access_token"
 
-        response = self.client.post("/expense-types/", self.user_expense_type_data)
+        response = self.client.post("/user_expense_type/", self.user_expense_type_data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "Viajes")
@@ -41,10 +41,10 @@ class UserExpenseTypeViewSetTestCase(TestCase):
         }
         mock_list.return_value = Response(status=status.HTTP_200_OK, data=self.user_expense_type_data)
 
-        request = self.client.get("/expense-types/")
+        request = self.client.get("/user_expense_type/")
         request.headers["Authorization"] = "Bearer mock_access_token"
 
-        response = self.client.get("/expense-types/")
+        response = self.client.get("/user_expense_type/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "Viajes")
@@ -57,11 +57,10 @@ class UserExpenseTypeViewSetTestCase(TestCase):
         }
         mock_destroy.return_value = Response(status=status.HTTP_204_NO_CONTENT)
 
-        request = self.client.delete("/expense-types/")
+        request = self.client.delete("/user_expense_type/1/")
         request.headers["Authorization"] = "Bearer mock_access_token"
-        request.body = {"id": 1}
 
-        response = self.client.delete("/expense-types/")
+        response = self.client.delete("/user_expense_type/1/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -78,11 +77,10 @@ class UserExpenseTypeViewSetTestCase(TestCase):
         }
         mock_partial_update.return_value = Response(status=status.HTTP_200_OK, data=new_user_expense_type_data)
 
-        request = self.client.put("/expense-type/", {"description": "Gastos incurridos en viajes por placer"})
+        request = self.client.put("/user_expense_type/1/", {"description": "Gastos incurridos en viajes por placer"})
         request.headers["Authorization"] = "Bearer mock_access_token"
-        request.body = {"id": 1}
 
-        response = self.client.put("/expense-types/", {"description": "Gastos incurridos en viajes por placer"})
+        response = self.client.put("/user_expense_type/1/", {"description": "Gastos incurridos en viajes por placer"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["description"], "Gastos incurridos en viajes por placer")
