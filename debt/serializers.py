@@ -4,9 +4,10 @@ from .models import Debt
 
 
 class DebtSerializer(serializers.ModelSerializer):
-    user = UserSerializer(readonly=True)
-    debtor = UserSerializer(readonly=True)
+    user = UserSerializer(read_only=True)
+    debtor = UserSerializer(read_only=True)
 
     class Meta:
         model = Debt
         fields = "__all__"
+        read_only_fields = ["user", "debtor"]

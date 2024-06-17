@@ -1,10 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, DebtViewSet
+from .views import DebtViewSet
 
-router = DefaultRouter()
-router.register(r"debts", DebtViewSet)
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path(
+        "",
+        DebtViewSet.as_view({"get": "list", "post": "create", "delete": "destroy", "put": "partial_update"}),
+        name="debt",
+    ),
 ]
