@@ -56,10 +56,10 @@ class ProfileView(APIView):
             authorization_header = request.headers.get("Authorization")
             if not authorization_header:
                 raise Exception("Authorization header not found")
-            
+
             access_token = authorization_header.split()[1]
             first_name = cognito_service.get_user_details(access_token)
-            
+
             return Response({"first_name": first_name}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
