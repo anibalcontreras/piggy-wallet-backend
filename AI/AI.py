@@ -66,3 +66,4 @@ def clean_category(category):
 
 setup_api_key()
 print(classify_text("Compré una pizza"))
+print(clean_category(classify_text("Compré una pizza")))
