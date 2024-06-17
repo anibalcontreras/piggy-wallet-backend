@@ -53,3 +53,24 @@ class LoginViewTests(TestCase):
         response = self.client.post(self.url, self.data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Login failed")
+
+
+class ProfileViewTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = "/auth/profile/"
+        self.data = {"email": "johndoe@example.com", "password": "securepassword123"}
+
+    @patch.object(CognitoService, "get_user_details")
+    def test_get_user_details_success(self, mock_get_user_details):
+        mock_get_user_details.return_value = "John"
+        response = self.client.get(self.url, HTTP_AUTHORIZATION="Bearer mock_access_token")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["first_name"], "John")
+
+    @patch.object(CognitoService, "get_user_details")
+    def test_get_user_details_failure(self, mock_get_user_details):
+        mock_get_user_details.side_effect = Exception("User details not found")
+        response = self.client.get(self.url, HTTP_AUTHORIZATION="Bearer mock_access_token")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "User details not found")
