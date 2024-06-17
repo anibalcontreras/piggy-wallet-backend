@@ -1,9 +1,14 @@
+# flake8: noqa
 import openai
 import os
+from textwrap import dedent
+from dotenv import load_dotenv
 
 
 def setup_api_key():
-    openai.api_key = os.environ["OPENAI_KEY"]
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    load_dotenv(dotenv_path=env_path)
+    openai.api_key = os.getenv("OPENAI_KEY")
 
 
 def classify_text(texto):
@@ -12,21 +17,29 @@ def classify_text(texto):
         messages=[
             {
                 "role": "system",
-                "content": "Eres un modelo que clasifica gastos en \
-                categorías predefinidas.",
+                "content": dedent(
+                    """\
+                    Eres un modelo que clasifica gastos en categorías predefinidas.
+                """
+                ),
             },
             {
                 "role": "user",
-                "content": f"Clasifica el siguiente gasto en una de las \
-              categorías: comida, transporte, vivienda, educación, salud, \
-                 entretenimiento,\
-             ahorro, inversión.\n\nTexto: {texto}\n\nCategoría:",
+                "content": dedent(
+                    f"""\
+                    Clasifica el siguiente gasto en una de las categorías: comida, transporte, vivienda, educación, salud, entretenimiento, ahorro, inversión.
+
+                    Texto: {texto}
+
+                    Categoría:
+                """
+                ),
             },
         ],
         max_tokens=15,
         temperature=0,
     )
-    category = response.choices[0].message["content"].strip()
+    category = response["choices"][0]["message"]["content"].strip()
     return category
 
 
@@ -49,3 +62,7 @@ def clean_category(category):
     if category not in categories_allowed:
         raise ValueError(f"Categoría no permitida: {category}")
     return category
+
+
+setup_api_key()
+print(classify_text("Compré una pizza"))
