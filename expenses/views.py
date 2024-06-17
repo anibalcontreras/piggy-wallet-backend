@@ -1,5 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+
+# from .models import Expense
 from .models import Expense
 from user_expense_type.models import UserExpenseType
 from categories.models import Category
@@ -36,9 +38,29 @@ class ExpenseViewSet(viewsets.ViewSet):
             username = self.get_user_id_from_token(request)
             expenses = Expense.objects.filter(username=username)
             serializer = ExpenseSerializer(expenses, many=True)
+            for ser in serializer.data:
+                ser.pop("username")
             return Response(serializer.data)
         except Expense.DoesNotExist:
             return Response({"error": "Expenses not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @cognito_authenticated
+    def retrieve(self, request, pk=None):
+        try:
+            username = self.get_user_id_from_token(request)
+            expense = Expense.objects.get(id=pk, username=username)
+            serializer = ExpenseSerializer(expense)
+            response = {
+                "user_expense_type": serializer.data["user_expense_type"],
+                "category": serializer.data["category"],
+                "bankcard_id": serializer.data["bankcard_id"],
+                "amount": serializer.data["amount"],
+            }
+            return Response(data=response)
+        except Expense.DoesNotExist:
+            return Response({"error": "Expense not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -52,17 +74,22 @@ class ExpenseViewSet(viewsets.ViewSet):
             serializer = ExpenseSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                response = {
+                    "user_expense_type": serializer.data["user_expense_type"],
+                    "category": serializer.data["category"],
+                    "bankcard_id": serializer.data["bankcard_id"],
+                    "amount": serializer.data["amount"],
+                }
+                return Response(data=response, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @cognito_authenticated
-    def destroy(self, request):
+    def destroy(self, request, pk=None):
         try:
             username = self.get_user_id_from_token(request)
-            id = request.data.get("id")
-            expense = Expense.objects.get(id=id, username=username)
+            expense = Expense.objects.get(id=pk, username=username)
             expense.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Expense.DoesNotExist:
@@ -71,15 +98,20 @@ class ExpenseViewSet(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @cognito_authenticated
-    def partial_update(self, request):
+    def partial_update(self, request, pk=None):
         try:
             username = self.get_user_id_from_token(request)
-            id = request.data.get("id")
-            expense = Expense.objects.get(id=id, username=username)
+            expense = Expense.objects.get(id=pk, username=username)
             serializer = ExpenseSerializer(expense, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                response = {
+                    "user_expense_type": serializer.data["user_expense_type"],
+                    "category": serializer.data["category"],
+                    "bankcard_id": serializer.data["bankcard_id"],
+                    "amount": serializer.data["amount"],
+                }
+                return Response(data=response)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Expense.DoesNotExist:
             return Response({"error": "Expense not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -115,19 +147,19 @@ class ExpenseGroupedByTypeAndCategoryViewSet(viewsets.ViewSet):
             today = now()
             expenses = (
                 Expense.objects.filter(username=username, created_at__year=today.year, created_at__month=today.month)
-                .values("expense_type_id", "category_id")
+                .values("user_expense_type_id", "category_id")
                 .annotate(total_amount=Sum("amount"))
             )
 
             for expense in expenses:
-                expense_type_name = UserExpenseType.objects.get(id=expense["expense_type_id"]).name
-                category_name = Category.objects.get(id=expense["category_id"]).name
+                user_expense_type = UserExpenseType.objects.get(id=expense["user_expense_type_id"])
+                category = Category.objects.get(id=expense["category_id"])
                 total_amount = expense["total_amount"]
 
-                if expense_type_name not in expenses_grouped:
-                    expenses_grouped[expense_type_name] = {}
+                if user_expense_type.name not in expenses_grouped:
+                    expenses_grouped[user_expense_type.name] = {}
 
-                expenses_grouped[expense_type_name][category_name] = total_amount
+                expenses_grouped[user_expense_type.name][category.name] = total_amount
 
             return Response(expenses_grouped)
         except Exception as e:

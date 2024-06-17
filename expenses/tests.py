@@ -12,8 +12,8 @@ class ExpenseViewSetTestCase(TestCase):
         self.client = APIClient()
         self.view = ExpenseViewSet()
         self.expense = {
-            "expense_type_id": 1,
-            "category_id": 1,
+            "user_expense_type": 1,
+            "category": 1,
             "bankcard_id": 1,
             "amount": 100,
         }
@@ -50,6 +50,22 @@ class ExpenseViewSetTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["amount"], 100)
 
+    @patch.object(ExpenseViewSet, "retrieve")
+    @patch.object(CognitoService, "login_user")
+    def test_retrieve(self, mock_login_user, mock_retrieve):
+        mock_login_user.return_value = {
+            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
+        }
+        mock_retrieve.return_value = Response(status=status.HTTP_200_OK, data=self.expense)
+
+        request = self.client.get("/expenses/1/")
+        request.headers["Authorization"] = "Bearer mock_access_token"
+
+        response = self.client.get("/expenses/1/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["amount"], 100)
+
     @patch.object(ExpenseViewSet, "destroy")
     @patch.object(CognitoService, "login_user")
     def test_destroy(self, mock_login_user, mock_destroy):
@@ -58,11 +74,10 @@ class ExpenseViewSetTestCase(TestCase):
         }
         mock_destroy.return_value = Response(status=status.HTTP_204_NO_CONTENT)
 
-        request = self.client.delete("/expenses/")
+        request = self.client.delete("/expenses/1/")
         request.headers["Authorization"] = "Bearer mock_access_token"
-        request.body = {"id": 1}
 
-        response = self.client.delete("/expenses/")
+        response = self.client.delete("/expenses/1/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -73,18 +88,17 @@ class ExpenseViewSetTestCase(TestCase):
             "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
         }
         new_expense = {
-            "expense_type_id": 1,
-            "category_id": 1,
+            "expense_type": 1,
+            "category": 1,
             "bankcard_id": 1,
             "amount": 200,
         }
         mock_partial_update.return_value = Response(status=status.HTTP_200_OK, data=new_expense)
 
-        request = self.client.put("/expenses/", {"amount": 200})
+        request = self.client.put("/expenses/1/", {"amount": 200})
         request.headers["Authorization"] = "Bearer mock_access_token"
-        request.body = {"id": 1}
 
-        response = self.client.put("/expenses/", {"amount": 200})
+        response = self.client.put("/expenses/1/", {"amount": 200})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["amount"], 200)
@@ -95,8 +109,8 @@ class ExpenseGroupedByTypeAndCategoryViewSetTestCase(TestCase):
         self.client = APIClient()
         self.view = ExpenseGroupedByTypeAndCategoryViewSet()
         self.expense = {
-            "expense_type_id": 1,
-            "category_id": 1,
+            "expense_type": 1,
+            "category": 1,
             "bankcard_id": 1,
             "amount": 100,
         }

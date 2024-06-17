@@ -1,13 +1,15 @@
 from rest_framework import serializers
 from .models import Expense
+from user_expense_type.models import UserExpenseType
+from categories.models import Category
 
 
 class ExpenseSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
 
     username = serializers.UUIDField()
-    expense_type_id = serializers.IntegerField()
-    category_id = serializers.IntegerField()
+    user_expense_type = serializers.PrimaryKeyRelatedField(queryset=UserExpenseType.objects.all())
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     bankcard_id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
