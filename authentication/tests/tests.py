@@ -63,14 +63,17 @@ class ProfileViewTests(TestCase):
 
     @patch.object(CognitoService, "get_user_details")
     def test_get_user_details_success(self, mock_get_user_details):
-        mock_get_user_details.return_value = "John"
+        mock_get_user_details.return_value = {
+            "name": "John Doe",
+            "phone": "+1234567890",
+        }
         response = self.client.get(self.url, HTTP_AUTHORIZATION="Bearer mock_access_token")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["first_name"], "John")
+        self.assertEqual(response.data, {"name": "John Doe", "phone": "+1234567890"})
 
     @patch.object(CognitoService, "get_user_details")
     def test_get_user_details_failure(self, mock_get_user_details):
-        mock_get_user_details.side_effect = Exception("User details not found")
+        mock_get_user_details.side_effect = Exception("User not found")
         response = self.client.get(self.url, HTTP_AUTHORIZATION="Bearer mock_access_token")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["error"], "User details not found")
+        self.assertEqual(response.data["error"], "User not found")

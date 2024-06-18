@@ -56,12 +56,3 @@ class CognitoService:
             return response
         except ClientError as e:
             raise e
-
-    def get_user_details(self, access_token):
-        try:
-            user_details = self.client.get_user(AccessToken=access_token)
-            user_attributes = user_details["UserAttributes"]
-            first_name = next((attr["Value"] for attr in user_attributes if attr["Name"] == "given_name"), None)
-            return first_name
-        except Exception as e:
-            raise Exception(f"Error fetching user details: {e}")
