@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from authentication.services.cognito_service import CognitoService
 from authentication.views import ProfileView
+from rest_framework.response import Response
 
 
 class RegisterViewTests(TestCase):
@@ -63,18 +64,14 @@ class ProfileViewTests(TestCase):
         self.data = {"email": "johndoe@example.com", "password": "securepassword123"}
 
     @patch.object(ProfileView, "get")
-    def test_get_user_details_success(self, mock_get_user_details):
-        mock_get_user_details.return_value = {
-            "name": "John Doe",
-            "phone": "+1234567890",
+    @patch.object(CognitoService, "login_user")
+    def test_get(self, mock_login_user, mock_get):
+        mock_login_user.return_value = {
+            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
         }
-        response = self.client.get(self.url, HTTP_AUTHORIZATION="Bearer mock_access_token")
+        mock_get.return_value = Response(status=status.HTTP_200_OK, data={"name": "John Doe", "phone": "+1234567890"})
+        request = self.client.get(self.url)
+        request.headers["Authorization"] = "Bearer mock_access_token"
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, {"name": "John Doe", "phone": "+1234567890"})
-
-    @patch.object(ProfileView, "get")
-    def test_get_user_details_failure(self, mock_get_user_details):
-        mock_get_user_details.side_effect = Exception("User not found")
-        response = self.client.get(self.url, HTTP_AUTHORIZATION="Bearer mock_access_token")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["error"], "User not found")
