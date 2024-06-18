@@ -3,6 +3,7 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework import status
 from authentication.services.cognito_service import CognitoService
+from .views import ProfileView
 
 
 class RegisterViewTests(TestCase):
@@ -61,7 +62,7 @@ class ProfileViewTests(TestCase):
         self.url = "/auth/profile/"
         self.data = {"email": "johndoe@example.com", "password": "securepassword123"}
 
-    @patch.object(CognitoService, "get_user_details")
+    @patch.object(ProfileView, "get")
     def test_get_user_details_success(self, mock_get_user_details):
         mock_get_user_details.return_value = {
             "name": "John Doe",
@@ -71,7 +72,7 @@ class ProfileViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, {"name": "John Doe", "phone": "+1234567890"})
 
-    @patch.object(CognitoService, "get_user_details")
+    @patch.object(ProfileView, "get")
     def test_get_user_details_failure(self, mock_get_user_details):
         mock_get_user_details.side_effect = Exception("User not found")
         response = self.client.get(self.url, HTTP_AUTHORIZATION="Bearer mock_access_token")
