@@ -56,3 +56,38 @@ class CognitoService:
             return response
         except ClientError as e:
             raise e
+
+    def list_users(self, attributes_to_get=None, limit=None, pagination_token=None):
+        """
+        Lists users from the Cognito user pool.
+        """
+        try:
+            response = self.client.list_users(UserPoolId=self.user_pool_id)
+            users = response["Users"]
+            simplified_users = self.extract_user_info(users)
+            return simplified_users
+        except Exception as e:
+            # Error handling remains the same
+            if hasattr(e, 'response') and 'Error' in e.response:
+                error_message = "Couldn't list users for {}. Here's why: {}: {}".format(
+                    self.user_pool_id,
+                    e.response["Error"]["Code"],
+                    e.response["Error"]["Message"]
+                )
+            else:
+                error_message = "Couldn't list users for {}. An error occurred: {}".format(
+                    self.user_pool_id, str(e)
+                )
+            return error_message
+
+    def extract_user_info(self, users):
+        simplified_users = []
+        for user in users:
+            user_info = {"Username": user["Username"]}
+            for attr in user["Attributes"]:
+                if attr["Name"] == "email":
+                    user_info["Email"] = attr["Value"]
+                elif attr["Name"] == "name":
+                    user_info["Name"] = attr["Value"]
+            simplified_users.append(user_info)
+        return simplified_users

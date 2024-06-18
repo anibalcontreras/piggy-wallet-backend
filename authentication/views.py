@@ -1,9 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .serializers import RegisterSerializer, LoginSerializer
+from rest_framework import generics, status
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from .services.cognito_service import CognitoService
 from django.conf import settings
+from django.db.models import Q
+from authentication.decorators import cognito_authenticated
+from django.contrib.auth import get_user_model
+
+import traceback
+import logging
 
 
 cognito_service = CognitoService(
@@ -48,3 +54,29 @@ class LoginView(APIView):
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserSearchView(APIView):
+
+    @cognito_authenticated
+    def get(self, request, *args, **kwargs):
+        
+        # Get users from Cognito
+        cognito_users = cognito_service.list_users()
+        # return Response(cognito_users_response)
+        
+        # Get the search query parameter
+        search = request.query_params.get('search', '').lower()
+        
+        # Filter users based on the search parameter
+        filtered_users = []
+        if search:
+            for user in cognito_users:
+                # Convert name and email to lowercase before comparison
+                name = user.get("Name", "").lower()
+                email = user.get("Email", "").lower()
+                if search in name or search in email:
+                    filtered_users.append(user)
+
+            return Response(filtered_users)
+        return Response(cognito_users)
