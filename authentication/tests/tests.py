@@ -3,7 +3,7 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework import status
 from authentication.services.cognito_service import CognitoService
-from .views import ProfileView
+from authentication.views import ProfileView
 
 
 class RegisterViewTests(TestCase):
