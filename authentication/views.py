@@ -1,15 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import generics, status
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from rest_framework import status
+from .serializers import RegisterSerializer, LoginSerializer
 from .services.cognito_service import CognitoService
 from django.conf import settings
-from django.db.models import Q
 from authentication.decorators import cognito_authenticated
-from django.contrib.auth import get_user_model
-
-import traceback
-import logging
 
 
 cognito_service = CognitoService(
@@ -60,14 +55,10 @@ class UserSearchView(APIView):
 
     @cognito_authenticated
     def get(self, request, *args, **kwargs):
-        
         # Get users from Cognito
         cognito_users = cognito_service.list_users()
-        # return Response(cognito_users_response)
-        
         # Get the search query parameter
         search = request.query_params.get('search', '').lower()
-        
         # Filter users based on the search parameter
         filtered_users = []
         if search:
