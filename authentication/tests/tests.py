@@ -61,9 +61,15 @@ class UserSearchViewTest(TestCase):
         self.client = APIClient()
         self.url = "/auth/search/"
         self.mock_cognito_users = [
-            {"Username": "616bc590-8031-7079-8afc-aabb63979373", "Email": "vicente.cruz@aurous.cl", "Name": "Vini Cruz"},
-            {"Username": "019bf590-2001-7040-53f7-07c94de20228", "Email": "vcrb@uc.cl", "Name": "Vicente Cruz"},
-            {"Username": "f1dbc570-b081-7084-7d18-02985b1e8986", "Email": "vicruz8@gmail.com", "Name": "Vinicius Junior"}
+            {"Username": "616bc590-8031-7079-8afc-aabb63979373",
+             "Email": "vicente.cruz@aurous.cl",
+             "Name": "Vini Cruz"},
+            {"Username": "019bf590-2001-7040-53f7-07c94de20228",
+             "Email": "vcrb@uc.cl",
+             "Name": "Vicente Cruz"},
+            {"Username": "f1dbc570-b081-7084-7d18-02985b1e8986",
+             "Email": "vicruz8@gmail.com",
+             "Name": "Vinicius Junior"}
         ]
 
     @patch.object(CognitoService, "login_user")
@@ -77,7 +83,6 @@ class UserSearchViewTest(TestCase):
         request = self.client.get(self.url)
         request.headers["Authorization"] = "Bearer mock_access_token"
 
-        response = self.client.get(self.url)
-
+        # response = self.client.get(self.url)
         # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # self.assertEqual(response.data, self.mock_cognito_users)
