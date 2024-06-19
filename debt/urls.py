@@ -9,4 +9,5 @@ urlpatterns = [
         DebtViewSet.as_view({"get": "list", "post": "create", "delete": "destroy", "put": "partial_update"}),
         name="debt",
     ),
+    path("users/", DebtViewSet.as_view({"get": "users"}), name="debt-users"),
 ]

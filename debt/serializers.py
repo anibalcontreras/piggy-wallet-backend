@@ -11,3 +11,8 @@ class DebtSerializer(serializers.ModelSerializer):
         model = Debt
         fields = "__all__"
         read_only_fields = ["user", "debtor"]
+
+
+class UserDebtSerializer(serializers.Serializer):
+    user_id = serializers.CharField(read_only=True)
+    first_name = serializers.CharField(read_only=True)
