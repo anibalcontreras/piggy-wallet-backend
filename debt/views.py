@@ -8,7 +8,13 @@ from rest_framework import status
 from .services.debt_services import get_user_debts
 from rest_framework.decorators import action
 from authentication.utils import get_user_id_from_token
-from .services.debt_services import get_related_users, calculate_balance, settle_debts, toggle_debt_payment
+from .services.debt_services import (
+    get_related_users,
+    calculate_balance,
+    settle_debts,
+    toggle_debt_payment,
+    get_debt_history,
+)
 
 User = get_user_model()
 
@@ -66,3 +72,11 @@ class DebtViewSet(viewsets.ModelViewSet):
             return Response({"is_paid": debt.is_paid}, status=status.HTTP_200_OK)
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+    @cognito_authenticated
+    @action(detail=False, methods=["get"], url_path="history/(?P<other_user_id>[^/.]+)")
+    def history(self, request, other_user_id=None):
+        user_id = get_user_id_from_token(request)
+        debts = get_debt_history(user_id, other_user_id)
+        serializer = DebtSerializer(debts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

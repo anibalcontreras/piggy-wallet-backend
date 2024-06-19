@@ -60,3 +60,13 @@ def toggle_debt_payment(debt_id):
         return debt
     except Debt.DoesNotExist:
         raise ValueError("Debt not found")
+
+
+def get_debt_history(user_id, other_user_id):
+    user = User.objects.get(user_id=user_id)
+    other_user = User.objects.get(user_id=other_user_id)
+
+    debts_as_user = Debt.objects.filter(user=user, debtor=other_user)
+    debts_as_debtor = Debt.objects.filter(user=other_user, debtor=user)
+
+    return debts_as_user.union(debts_as_debtor)
