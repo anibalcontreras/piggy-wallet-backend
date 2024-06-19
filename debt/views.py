@@ -5,9 +5,10 @@ from django.contrib.auth import get_user_model
 from authentication.decorators import cognito_authenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .services.get_user_debts import get_user_debts
+from .services.debt_services import get_user_debts
 from rest_framework.decorators import action
 from authentication.utils import get_user_id_from_token
+from .services.debt_services import get_related_users, calculate_balance
 
 User = get_user_model()
 
@@ -38,15 +39,14 @@ class DebtViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def users(self, request, *args, **kwargs):
         user_id = get_user_id_from_token(request)
-        user = User.objects.get(user_id=user_id)
-        debts = get_user_debts(user)
-
-        users = set()
-        for debt in debts:
-            if debt.user != user:
-                users.add(debt.user)
-            if debt.debtor != user:
-                users.add(debt.debtor)
-
-        serialized_users = UserDebtSerializer(users, many=True)
+        related_users = get_related_users(user_id)
+        serialized_users = UserDebtSerializer(related_users, many=True)
         return Response(serialized_users.data)
+
+    @cognito_authenticated
+    @action(detail=False, methods=["get"], url_path="balance/(?P<other_user_id>[^/.]+)")
+    def balance(self, request, other_user_id=None):
+        user_id = get_user_id_from_token(request)
+        balance = calculate_balance(user_id, other_user_id)
+        result = {"balance": balance}
+        return Response(result, status=status.HTTP_200_OK)

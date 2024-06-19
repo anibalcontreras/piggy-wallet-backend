@@ -10,4 +10,5 @@ urlpatterns = [
         name="debt",
     ),
     path("users/", DebtViewSet.as_view({"get": "users"}), name="debt-users"),
+    path("balance/<str:other_user_id>/", DebtViewSet.as_view({"get": "balance"}), name="debt-balance"),
 ]
