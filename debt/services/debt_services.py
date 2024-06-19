@@ -27,7 +27,9 @@ def calculate_balance(user_id, other_user_id):
 
 def get_related_users(user_id):
     user = User.objects.get(user_id=user_id)
-    debts = Debt.objects.filter(user=user) | Debt.objects.filter(debtor=user)
+    debts = Debt.objects.filter(user=user).filter(is_paid=False) | Debt.objects.filter(debtor=user).filter(
+        is_paid=False
+    )
 
     users = set()
     for debt in debts:
@@ -37,3 +39,24 @@ def get_related_users(user_id):
             users.add(debt.debtor)
 
     return users
+
+
+def settle_debts(user_id, other_user_id):
+    user = User.objects.get(user_id=user_id)
+    other_user = User.objects.get(user_id=other_user_id)
+
+    debts_as_user = Debt.objects.filter(user=user, debtor=other_user, is_paid=False)
+    debts_as_debtor = Debt.objects.filter(user=other_user, debtor=user, is_paid=False)
+
+    debts_as_user.update(is_paid=True)
+    debts_as_debtor.update(is_paid=True)
+
+
+def toggle_debt_payment(debt_id):
+    try:
+        debt = Debt.objects.get(id=debt_id)
+        debt.is_paid = not debt.is_paid
+        debt.save()
+        return debt
+    except Debt.DoesNotExist:
+        raise ValueError("Debt not found")
