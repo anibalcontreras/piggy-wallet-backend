@@ -62,8 +62,3 @@ def clean_category(category):
     if category not in categories_allowed:
         raise ValueError(f"Categoría no permitida: {category}")
     return category
-
-
-setup_api_key()
-print(classify_text("Compré una pizza"))
-print(clean_category(classify_text("Compré una pizza")))
