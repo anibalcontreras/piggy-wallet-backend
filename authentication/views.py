@@ -80,8 +80,8 @@ class ProfileView(APIView):
             user = User.objects.get(user_id=username)
             return Response(
                 {
-                    "name": user.first_name,
-                    "phone": user.phone,
+                    "user_id": user.user_id,
+                    "first_name": user.first_name,
                 },
                 status=status.HTTP_200_OK,
             )

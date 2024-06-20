@@ -69,9 +69,9 @@ class ProfileViewTests(TestCase):
         mock_login_user.return_value = {
             "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
         }
-        mock_get.return_value = Response(status=status.HTTP_200_OK, data={"name": "John Doe", "phone": "+1234567890"})
+        mock_get.return_value = Response(status=status.HTTP_200_OK, data={"first_name": "John Doe"})
         request = self.client.get(self.url)
         request.headers["Authorization"] = "Bearer mock_access_token"
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {"name": "John Doe", "phone": "+1234567890"})
+        self.assertEqual(response.data["first_name"], "John Doe")
