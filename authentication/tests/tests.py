@@ -58,19 +58,6 @@ class LoginViewTests(TestCase):
         self.assertEqual(response.data["error"], "Login failed")
 
 
-class UserSearchViewTest(TestCase):
-    def setUp(self):
-        # Create test users in the test database
-        User.objects.create(username="user1", first_name="Tomas", email="user1@example.com", phone="1234567890")
-        User.objects.create(username="user2", first_name="Tomas", email="user2@example.com", phone="0987654321")
-        User.objects.create(username="user3", first_name="Tamara", email="user3@example.com", phone="1122334455")
-        self.client = APIClient()
-        self.url = '/auth/search/'
-        self.user_credentials = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
-        }
-
-
 class ProfileViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
