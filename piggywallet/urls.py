@@ -25,4 +25,5 @@ urlpatterns = [
     path("budget/", include("budget.urls")),
     path("user_expense_type/", include("user_expense_type.urls")),
     path("categories/", include("categories.urls")),
+    path("piggies/", include("piggies.urls")),
 ]
