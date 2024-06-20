@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "authentication",
     "budget",
     "debt",
+    "user_expense_type",
+    "categories",
 ]
 
 REST_FRAMEWORK = {
