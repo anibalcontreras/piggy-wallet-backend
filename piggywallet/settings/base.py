@@ -46,9 +46,11 @@ INSTALLED_APPS = [
     "playground",
     "authentication",
     "budget",
+    "debt",
     "user_expense_type",
     "categories",
     "expenses",
+    "piggies",
 ]
 
 REST_FRAMEWORK = {
