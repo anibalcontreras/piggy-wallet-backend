@@ -5,6 +5,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from authentication.services.cognito_service import CognitoService
 from authentication.models import User
+from authentication.views import ProfileView
+from rest_framework.response import Response
 
 
 class RegisterViewTests(TestCase):
@@ -68,3 +70,23 @@ class UserSearchViewTest(TestCase):
         self.user_credentials = {
             "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
         }
+
+
+class ProfileViewTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = "/auth/profile/"
+        self.data = {"email": "johndoe@example.com", "password": "securepassword123"}
+
+    @patch.object(ProfileView, "get")
+    @patch.object(CognitoService, "login_user")
+    def test_get(self, mock_login_user, mock_get):
+        mock_login_user.return_value = {
+            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
+        }
+        mock_get.return_value = Response(status=status.HTTP_200_OK, data={"first_name": "John Doe"})
+        request = self.client.get(self.url)
+        request.headers["Authorization"] = "Bearer mock_access_token"
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["first_name"], "John Doe")

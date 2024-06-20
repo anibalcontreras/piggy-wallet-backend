@@ -4,9 +4,9 @@ from rest_framework import status
 from .serializers import RegisterSerializer, LoginSerializer
 from .services.cognito_service import CognitoService
 from django.conf import settings
-from authentication.decorators import cognito_authenticated
 from django.forms.models import model_to_dict
-from .models import User
+from .decorators import cognito_authenticated
+import jwt
 
 
 cognito_service = CognitoService(
@@ -73,3 +73,39 @@ class UserSearchView(APIView):
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProfileView(APIView):
+    def get_user_id_from_token(self, request):
+        try:
+            authorization_header = request.headers.get("Authorization")
+            if not authorization_header:
+                raise Exception("Authorization header not found")
+
+            token = authorization_header.split()[1]
+            decoded_token = jwt.decode(token, options={"verify_signature": False})
+            user_id = decoded_token.get("username")
+            if not user_id:
+                raise Exception("User ID not found in token")
+            return user_id
+        except jwt.DecodeError:
+            raise Exception("Invalid token")
+        except jwt.ExpiredSignatureError:
+            raise Exception("Expired token")
+        except Exception as e:
+            raise Exception(f"Error decoding token: {e}")
+
+    @cognito_authenticated
+    def get(self, request):
+        try:
+            username = self.get_user_id_from_token(request)
+            user = User.objects.get(user_id=username)
+            return Response(
+                {
+                    "user_id": user.user_id,
+                    "first_name": user.first_name,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)

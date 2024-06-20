@@ -1,33 +1,31 @@
 from functools import wraps
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view, authentication_classes
+from django.contrib.auth import get_user_model
 from .services.cognito_authentication import CognitoAuthentication
+from .utils import get_user_id_from_token
+
+User = get_user_model()
 
 
 def cognito_authenticated(func):
     @wraps(func)
-    def wrapper(self, request, *args, **kwargs):
-        auth = CognitoAuthentication()
+    def wrapper(view_instance, request, *args, **kwargs):
         try:
-            result = auth.authenticate(request)
-            if result is None:
+            user_id = get_user_id_from_token(request)
+            try:
+                user = User.objects.get(user_id=user_id)
+                request.user = user
+            except User.DoesNotExist:
                 return Response(
-                    {"error": "Authentication credentials were not provided or are invalid."},
+                    {"error": "Authenticated user not found."},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
-            user, auth_error = result
-            if auth_error or not user:
-                return Response(
-                    {"error": "Authentication credentials were not provided or are invalid."},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-            request.user = user
-            return func(self, request, *args, **kwargs)
+            return func(view_instance, request, *args, **kwargs)
         except Exception as e:
             return Response(
                 {"error": f"Authentication failed: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
     return wrapper
