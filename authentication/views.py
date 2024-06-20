@@ -5,6 +5,7 @@ from .serializers import RegisterSerializer, LoginSerializer
 from .services.cognito_service import CognitoService
 from django.conf import settings
 from django.forms.models import model_to_dict
+from .models import User
 from .decorators import cognito_authenticated
 import jwt
 
