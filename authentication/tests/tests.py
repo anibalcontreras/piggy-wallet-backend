@@ -2,7 +2,6 @@ from django.test import TestCase
 from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework import status
-from rest_framework.response import Response
 from authentication.services.cognito_service import CognitoService
 from authentication.models import User
 from authentication.views import ProfileView
