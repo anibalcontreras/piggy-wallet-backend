@@ -5,6 +5,8 @@ from .serializers import RegisterSerializer, LoginSerializer
 from .services.cognito_service import CognitoService
 from django.conf import settings
 from authentication.decorators import cognito_authenticated
+from django.forms.models import model_to_dict
+from .models import User
 
 
 cognito_service = CognitoService(
@@ -54,20 +56,20 @@ class LoginView(APIView):
 class UserSearchView(APIView):
 
     @cognito_authenticated
-    def get(self, request, *args, **kwargs):
-        # Get users from Cognito
-        cognito_users = cognito_service.list_users()
-        # Get the search query parameter
-        search = request.query_params.get('search', '').lower()
-        # Filter users based on the search parameter
-        filtered_users = []
-        if search:
-            for user in cognito_users:
-                # Convert name and email to lowercase before comparison
-                name = user.get("Name", "").lower()
-                email = user.get("Email", "").lower()
-                if search in name or search in email:
-                    filtered_users.append(user)
-
+    def get(self, request):
+        try:
+            search = request.query_params.get('search', '').lower()
+            list_of_users = User.objects.all()
+            filtered_users = [
+                {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "email": user.email,
+                    "phone": user.phone
+                } for user in list_of_users if search in user.first_name.lower() or search in user.email.lower()
+            ]
             return Response(filtered_users)
-        return Response(cognito_users)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
