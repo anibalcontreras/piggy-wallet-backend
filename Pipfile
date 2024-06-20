@@ -8,6 +8,11 @@ django = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
 openai = "*"
+djangorestframework = "*"
+boto3 = "*"
+pyjwt = "*"
+requests = "*"
+cryptography = "*"
 
 [dev-packages]
 flake8 = "*"
@@ -19,6 +24,7 @@ pre-commit = "*"
 coverage = "*"
 pytest-cov = "*"
 flake8-pyproject = "*"
+factory-boy = "*"
 
 [requires]
 python_version = "3.11"
