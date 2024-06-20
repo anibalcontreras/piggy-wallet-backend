@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework.response import Response
 from authentication.services.cognito_service import CognitoService
+from authentication.models import User
 
 
 class RegisterViewTests(TestCase):
@@ -58,31 +59,21 @@ class LoginViewTests(TestCase):
 
 class UserSearchViewTest(TestCase):
     def setUp(self):
+        # Create test users in the test database
+        User.objects.create(username="user1", first_name="Tomas", email="user1@example.com", phone="1234567890")
+        User.objects.create(username="user2", first_name="Tomas", email="user2@example.com", phone="0987654321")
+        User.objects.create(username="user3", first_name="Tamara", email="user3@example.com", phone="1122334455")
         self.client = APIClient()
-        self.url = "/auth/search/"
-        self.mock_cognito_users = [
-            {"Username": "616bc590-8031-7079-8afc-aabb63979373",
-             "Email": "vicente.cruz@aurous.cl",
-             "Name": "Vini Cruz"},
-            {"Username": "019bf590-2001-7040-53f7-07c94de20228",
-             "Email": "vcrb@uc.cl",
-             "Name": "Vicente Cruz"},
-            {"Username": "f1dbc570-b081-7084-7d18-02985b1e8986",
-             "Email": "vicruz8@gmail.com",
-             "Name": "Vinicius Junior"}
-        ]
-
-    @patch.object(CognitoService, "login_user")
-    @patch.object(CognitoService, "list_users")
-    def test_create(self, mock_login_user, mock_list_users):
-        mock_login_user.return_value = {
+        self.url = '/auth/search/'
+        self.user_credentials = {
             "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
         }
-        mock_list_users.return_value = Response(status=status.HTTP_201_CREATED, data=self.mock_cognito_users)
 
-        request = self.client.get(self.url)
-        request.headers["Authorization"] = "Bearer mock_access_token"
+    @patch.object(CognitoService, "login_user")
+    def test_search_all_users(self, mock_login_user):
+        mock_login_user.return_value = self.user_credentials
+        response = self.client.get(self.url)
+        response.headers["Authorization"] = "Bearer mock_access_token"
 
-        # response = self.client.get(self.url)
-        # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # self.assertEqual(response.data, self.mock_cognito_users)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # self.assertEqual(len(response.data), 3)
