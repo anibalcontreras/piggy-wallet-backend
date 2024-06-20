@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "debt",
     "user_expense_type",
     "categories",
+    "piggies",
 ]
 
 REST_FRAMEWORK = {
