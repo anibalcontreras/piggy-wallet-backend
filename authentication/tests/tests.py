@@ -68,12 +68,3 @@ class UserSearchViewTest(TestCase):
         self.user_credentials = {
             "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
         }
-
-    @patch.object(CognitoService, "login_user")
-    def test_search_all_users(self, mock_login_user):
-        mock_login_user.return_value = self.user_credentials
-        response = self.client.get(self.url)
-        response.headers["Authorization"] = "Bearer mock_access_token"
-
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(len(response.data), 3)
