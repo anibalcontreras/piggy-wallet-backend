@@ -33,6 +33,7 @@ jobs:
       - uses: pavelzw/pytest-action@v2
         env:
           SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           AWS_REGION: us-east-2
         with:
           emoji: false
