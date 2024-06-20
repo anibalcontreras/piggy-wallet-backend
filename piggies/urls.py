@@ -11,5 +11,5 @@ urlpatterns = [
         "users/",
         NotPiggiesViewSet.as_view({"get": "users"}),
         name="not_piggies",
-    )
+    ),
 ]

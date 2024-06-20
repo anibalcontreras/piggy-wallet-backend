@@ -8,6 +8,7 @@ from authentication.decorators import cognito_authenticated
 from .models import Piggies
 from .serializers import PiggiesSerializer
 
+
 class PiggiesViewSet(viewsets.ViewSet):
     def get_user_id_from_token(self, request):
         try:
