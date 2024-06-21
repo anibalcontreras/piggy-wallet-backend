@@ -96,6 +96,9 @@ class NotPiggiesViewSet(viewsets.ViewSet):
             piggies = Piggies.objects.filter(username=username)
             serializer = PiggiesSerializer(piggies, many=True)
 
+            if len(serializer.data) == 0:
+                return Response(data=filtered_users)
+
             final_users = []
 
             for pig in serializer.data:
