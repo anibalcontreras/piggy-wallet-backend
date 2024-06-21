@@ -3,13 +3,8 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework import status
 from authentication.services.cognito_service import CognitoService
-from authentication.models import User
-<<<<<<< HEAD
 from authentication.views import ProfileView
 from rest_framework.response import Response
-=======
-from authentication.views import UserSearchView
->>>>>>> test: usersearchview
 
 
 class RegisterViewTests(TestCase):

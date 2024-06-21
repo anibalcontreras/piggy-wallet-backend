@@ -59,15 +59,12 @@ class UserSearchView(APIView):
     @cognito_authenticated
     def get(self, request):
         try:
-            search = request.query_params.get('search', '').lower()
+            search = request.query_params.get("search", "").lower()
             list_of_users = User.objects.all()
             filtered_users = [
-                {
-                    "username": user.username,
-                    "first_name": user.first_name,
-                    "email": user.email,
-                    "phone": user.phone
-                } for user in list_of_users if search in user.first_name.lower() or search in user.email.lower()
+                {"username": user.username, "first_name": user.first_name, "email": user.email, "phone": user.phone}
+                for user in list_of_users
+                if search in user.first_name.lower() or search in user.email.lower()
             ]
             return Response(filtered_users)
         except User.DoesNotExist:
