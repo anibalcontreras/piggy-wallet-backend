@@ -14,7 +14,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dev.Dockerfile
+      dockerfile: Dockerfile
     container_name: web
     volumes:
       - .:/app
@@ -30,7 +30,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_PORT: ${DB_PORT}
       POSTGRES_HOST: ${DB_HOST}
-      DJANGO_SETTINGS_MODULE: piggywallet.settings.dev
+      DJANGO_SETTINGS_MODULE: piggywallet.settings.prod
 
 networks:
   app_network:
