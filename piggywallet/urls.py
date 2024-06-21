@@ -22,4 +22,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/", include("authentication.urls")),
     path("playground/", include("playground.urls")),
+    path("budget/", include("budget.urls")),
+    path("debt/", include("debt.urls")),
+    path("user_expense_type/", include("user_expense_type.urls")),
+    path("categories/", include("categories.urls")),
+    path("expenses/", include("expenses.urls")),
+    path("piggies/", include("piggies.urls")),
 ]
