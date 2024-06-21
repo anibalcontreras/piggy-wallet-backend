@@ -33,9 +33,25 @@ class PiggiesViewSet(viewsets.ViewSet):
     def list(self, request):
         try:
             username = self.get_user_id_from_token(request)
+            User = get_user_model()
+            users = [{"user_id": str(x.user_id), "first_name": x.first_name} for x in User.objects.all()]
+
+            filtered_users = []
+
+            for user in users:
+                if user["user_id"] != username:
+                    filtered_users.append(user)
+
             piggies = Piggies.objects.filter(username=username)
             serializer = PiggiesSerializer(piggies, many=True)
-            return Response(data=serializer.data)
+            final_users = []
+
+            for pig in serializer.data:
+                for user in filtered_users:
+                    if str(pig["piggy"]) == user["user_id"]:
+                        final_users.append(user)
+
+            return Response(data=final_users)
         except Piggies.DoesNotExist:
             return Response({"error": "Piggies not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
