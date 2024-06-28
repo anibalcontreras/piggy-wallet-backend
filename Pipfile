@@ -13,6 +13,7 @@ boto3 = "*"
 pyjwt = "*"
 requests = "*"
 cryptography = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 flake8 = "*"
