@@ -82,6 +82,7 @@ class ProfileView(APIView):
                 {
                     "user_id": user.user_id,
                     "first_name": user.first_name,
+                    "email": user.email
                 },
                 status=status.HTTP_200_OK,
             )

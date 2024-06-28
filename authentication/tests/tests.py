@@ -65,6 +65,12 @@ class ProfileViewTests(TestCase):
 
     @patch.object(ProfileView, "get")
     @patch.object(CognitoService, "login_user")
+    # Hay que modificar este test o no? Porque retorna first_name, user_id y email
+    # De hecho, no se como funcionaba si solo estaba testeando first_name y la response actual es con user_id tmb:
+    # {
+    #     "user_id": "819ba510-10d1-7014-a98a-0bc46d8e9b5e",
+    #     "first_name": "Pedro Alonso"
+    # }
     def test_get(self, mock_login_user, mock_get):
         mock_login_user.return_value = {
             "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
