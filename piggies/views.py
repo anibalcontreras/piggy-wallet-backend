@@ -101,7 +101,9 @@ class NotPiggiesViewSet(viewsets.ViewSet):
         try:
             username = self.get_user_id_from_token(request)
             User = get_user_model()
-            users = [{"user_id": str(x.user_id), "first_name": x.first_name} for x in User.objects.all()]
+            users = [
+                {"user_id": str(x.user_id), "first_name": x.first_name, "email": x.email} for x in User.objects.all()
+            ]
 
             filtered_users = []
 

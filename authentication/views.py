@@ -79,10 +79,7 @@ class ProfileView(APIView):
             username = self.get_user_id_from_token(request)
             user = User.objects.get(user_id=username)
             return Response(
-                {
-                    "user_id": user.user_id,
-                    "first_name": user.first_name,
-                },
+                {"user_id": user.user_id, "first_name": user.first_name, "email": user.email},
                 status=status.HTTP_200_OK,
             )
         except User.DoesNotExist:
