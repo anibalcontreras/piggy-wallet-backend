@@ -17,7 +17,9 @@ class BankCardViewSet(viewsets.ViewSet):
             serializer = BankCardSerializer(cards, many=True)
 
             if len(serializer.data) == 0:
-                default = BankCardSerializer(data={"user_id": user_id, "account_number": 0, "bank_name": "None", "card_type": "default"})
+                default = BankCardSerializer(
+                    data={"user_id": user_id, "account_number": 0, "bank_name": "None", "card_type": "default"}
+                )
 
                 if default.is_valid():
                     default.save()
@@ -55,7 +57,9 @@ class BankCardViewSet(viewsets.ViewSet):
             return Response(data=serializer.data)
         except BankCard.DoesNotExist:
             if pk == 1:
-                default = BankCardSerializer(data={"user_id": user_id, "account_number": 0, "bank_name": "None", "card_type": "default"})
+                default = BankCardSerializer(
+                    data={"user_id": user_id, "account_number": 0, "bank_name": "None", "card_type": "default"}
+                )
 
                 if default.is_valid():
                     default.save()
