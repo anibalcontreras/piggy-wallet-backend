@@ -8,6 +8,8 @@ from rest_framework import status
 from .services.debt_services import get_user_debts
 from rest_framework.decorators import action
 from authentication.utils import get_user_id_from_token
+from datetime import timedelta
+from django.utils import timezone
 from .services.debt_services import (
     get_related_users,
     calculate_balance,
@@ -80,3 +82,32 @@ class DebtViewSet(viewsets.ModelViewSet):
         debts = get_debt_history(user_id, other_user_id)
         serializer = DebtSerializer(debts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @cognito_authenticated
+    @action(detail=False, methods=["get"], url_path="unpaid_debts")
+    def unpaid_debts(self, request):
+        user_id = get_user_id_from_token(request)
+        now = timezone.now()
+        print("now: ", now)
+        start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        print("start_of_week: ", start_of_week)
+        start_of_last_week = start_of_week - timedelta(weeks=1)
+        print("start_of_last_week: ", start_of_last_week)
+        start_of_previous_weeks = start_of_week - timedelta(weeks=2)
+        print("start_of_previous_weeks: ", start_of_previous_weeks)
+
+        present_week_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__gte=start_of_week)
+
+        last_week_debts = Debt.objects.filter(
+            user__user_id=user_id, is_paid=False, created_at__gte=start_of_last_week, created_at__lt=start_of_week
+        )
+
+        previous_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__lt=start_of_last_week)
+
+        response_data = {
+            "present_week": DebtSerializer(present_week_debts, many=True).data,
+            "last_week": DebtSerializer(last_week_debts, many=True).data,
+            "previous_weeks": DebtSerializer(previous_debts, many=True).data,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)

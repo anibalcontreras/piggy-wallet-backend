@@ -14,4 +14,5 @@ urlpatterns = [
     path("settle/<str:other_user_id>/", DebtViewSet.as_view({"post": "settle"}), name="debt-settle"),
     path("toggle-payment/<str:debt_id>/", DebtViewSet.as_view({"put": "toggle_payment"}), name="debt-toggle-payment"),
     path("history/<str:other_user_id>/", DebtViewSet.as_view({"get": "history"}), name="debt-history"),
+    path("unpaid_debts/", DebtViewSet.as_view({"get": "unpaid_debts"}), name="debt-unpaid-debts"),
 ]
