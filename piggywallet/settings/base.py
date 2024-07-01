@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "categories",
     "expenses",
     "piggies",
+    "bankcard",
 ]
 
 REST_FRAMEWORK = {

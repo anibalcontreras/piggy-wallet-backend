@@ -1,15 +1,17 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from .models import Expense
 from user_expense_type.models import UserExpenseType
 from categories.models import Category
+from bankcard.models import BankCard
 
 
 class ExpenseSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    username = serializers.UUIDField()
+    username = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
     user_expense_type = serializers.PrimaryKeyRelatedField(queryset=UserExpenseType.objects.all(), required=False)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
-    bankcard_id = serializers.IntegerField()
+    bankcard_id = serializers.PrimaryKeyRelatedField(queryset=BankCard.objects.all())
     amount = serializers.IntegerField()
     description = serializers.CharField(max_length=255, allow_blank=True, allow_null=True)
 
