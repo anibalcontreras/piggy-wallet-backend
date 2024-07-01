@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .serializers import DebtSerializer, UserDebtSerializer
+from .serializers import DebtSerializer, UserDebtSerializer, UnpaidDebtsHistorySerializer
 from .models import Debt
 from django.contrib.auth import get_user_model
 from authentication.decorators import cognito_authenticated
@@ -88,13 +88,8 @@ class DebtViewSet(viewsets.ModelViewSet):
     def unpaid_debts(self, request):
         user_id = get_user_id_from_token(request)
         now = timezone.now()
-        print("now: ", now)
         start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-        print("start_of_week: ", start_of_week)
         start_of_last_week = start_of_week - timedelta(weeks=1)
-        print("start_of_last_week: ", start_of_last_week)
-        start_of_previous_weeks = start_of_week - timedelta(weeks=2)
-        print("start_of_previous_weeks: ", start_of_previous_weeks)
 
         present_week_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__gte=start_of_week)
 
@@ -105,9 +100,9 @@ class DebtViewSet(viewsets.ModelViewSet):
         previous_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__lt=start_of_last_week)
 
         response_data = {
-            "present_week": DebtSerializer(present_week_debts, many=True).data,
-            "last_week": DebtSerializer(last_week_debts, many=True).data,
-            "previous_weeks": DebtSerializer(previous_debts, many=True).data,
+            "present_week": UnpaidDebtsHistorySerializer(present_week_debts, many=True).data,
+            "last_week": UnpaidDebtsHistorySerializer(last_week_debts, many=True).data,
+            "previous_weeks": UnpaidDebtsHistorySerializer(previous_debts, many=True).data,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)

@@ -8,6 +8,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["user_id", "first_name", "phone", "email"]
 
 
+class UserMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["user_id", "first_name"]
+
+
 class RegisterSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=150)
     phone = serializers.CharField(max_length=15)
