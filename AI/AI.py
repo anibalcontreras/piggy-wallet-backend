@@ -3,6 +3,7 @@ import openai
 import os
 from textwrap import dedent
 from dotenv import load_dotenv
+from categories.models import Category
 
 
 def setup_api_key():
@@ -12,6 +13,10 @@ def setup_api_key():
 
 
 def classify_text(texto):
+    setup_api_key()
+    if not openai.api_key:
+        raise ValueError("OpenAI API key is not set. Please check your .env file.")
+
     response = openai.ChatCompletion.create(
         model="gpt-4-turbo",
         messages=[
@@ -62,3 +67,12 @@ def clean_category(category):
     if category not in categories_allowed:
         raise ValueError(f"Categoría no permitida: {category}")
     return category
+
+
+def get_category_name_from_description(description):
+    categoria_clasificada = classify_text(description)
+    categoria_limpia = clean_category(categoria_clasificada)
+
+    if not Category.objects.filter(name=categoria_limpia).exists():
+        raise ValueError("Categoría no encontrada.")
+    return categoria_limpia
