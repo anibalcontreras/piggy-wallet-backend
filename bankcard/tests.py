@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from .views import BankCardViewSet
 
 
-class ExpenseViewSetTestCase(TestCase):
+class BankCardViewSetTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.view = BankCardViewSet()
