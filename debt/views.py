@@ -8,14 +8,12 @@ from rest_framework import status
 from .services.debt_services import get_user_debts
 from rest_framework.decorators import action
 from authentication.utils import get_user_id_from_token
-from datetime import timedelta
-from django.utils import timezone
 from .services.debt_services import (
     get_related_users,
     calculate_balance,
     settle_debts,
     toggle_debt_payment,
-    get_debt_history,
+    get_unpaid_debts_by_week,
 )
 
 User = get_user_model()
@@ -76,28 +74,10 @@ class DebtViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
 
     @cognito_authenticated
-    @action(detail=False, methods=["get"], url_path="history/(?P<other_user_id>[^/.]+)")
-    def history(self, request, other_user_id=None):
+    @action(detail=False, methods=["get"], url_path="unpaid-history/(?P<other_user_id>[^/.]+)")
+    def unpaid_history(self, request, other_user_id=None):
         user_id = get_user_id_from_token(request)
-        debts = get_debt_history(user_id, other_user_id)
-        serializer = DebtSerializer(debts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @cognito_authenticated
-    @action(detail=False, methods=["get"], url_path="unpaid_debts")
-    def unpaid_debts(self, request):
-        user_id = get_user_id_from_token(request)
-        now = timezone.now()
-        start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-        start_of_last_week = start_of_week - timedelta(weeks=1)
-
-        present_week_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__gte=start_of_week)
-
-        last_week_debts = Debt.objects.filter(
-            user__user_id=user_id, is_paid=False, created_at__gte=start_of_last_week, created_at__lt=start_of_week
-        )
-
-        previous_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__lt=start_of_last_week)
+        present_week_debts, last_week_debts, previous_debts = get_unpaid_debts_by_week(user_id)
 
         response_data = {
             "present_week": UnpaidDebtsHistorySerializer(present_week_debts, many=True).data,

@@ -1,5 +1,7 @@
 from debt.models import Debt
 from django.contrib.auth import get_user_model
+from datetime import timedelta
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -62,11 +64,15 @@ def toggle_debt_payment(debt_id):
         raise ValueError("Debt not found")
 
 
-def get_debt_history(user_id, other_user_id):
-    user = User.objects.get(user_id=user_id)
-    other_user = User.objects.get(user_id=other_user_id)
+def get_unpaid_debts_by_week(user_id):
+    now = timezone.now()
+    start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    start_of_last_week = start_of_week - timedelta(weeks=1)
 
-    debts_as_user = Debt.objects.filter(user=user, debtor=other_user)
-    debts_as_debtor = Debt.objects.filter(user=other_user, debtor=user)
+    present_week_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__gte=start_of_week)
+    last_week_debts = Debt.objects.filter(
+        user__user_id=user_id, is_paid=False, created_at__gte=start_of_last_week, created_at__lt=start_of_week
+    )
+    previous_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__lt=start_of_last_week)
 
-    return debts_as_user.union(debts_as_debtor)
+    return present_week_debts, last_week_debts, previous_debts
