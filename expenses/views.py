@@ -9,7 +9,7 @@ import jwt
 from django.db.models import Sum
 from django.utils.timezone import now
 from authentication.utils import get_user_id_from_token
-from AI.AI import get_category_name_from_description
+from expenses.services.categorize_expense import categorize_expense_description
 
 
 class ExpenseViewSet(viewsets.ViewSet):
@@ -63,15 +63,9 @@ class ExpenseViewSet(viewsets.ViewSet):
             data = request.data.copy()
             data["username"] = username
 
-            if "description" in data:
-                try:
-                    category_name = get_category_name_from_description(data["description"])
-                    category_obj = Category.objects.get(name=category_name)
-                    data["category"] = category_obj.id
-                except ValueError as e:
-                    return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({"error": "Description is required"}, status=status.HTTP_400_BAD_REQUEST)
+            data, error_response = categorize_expense_description(data)
+            if error_response:
+                return error_response
 
             serializer = ExpenseSerializer(data=data)
             if serializer.is_valid():

@@ -1,12 +1,11 @@
 # flake8: noqa
 import unittest
 from unittest.mock import patch
-from AI import classify_text, clean_category
+from AI import classify_text, category_matched_with_id
 from textwrap import dedent
 
 
 class TestGastosClassifier(unittest.TestCase):
-
     @patch("openai.ChatCompletion.create")
     def test_classify_text(self, mock_create):
         # Configurar el mock para devolver una respuesta simulada
@@ -50,13 +49,13 @@ class TestGastosClassifier(unittest.TestCase):
 
     def test_clean_category(self):
         # Pruebas con diferentes casos
-        self.assertEqual(clean_category("Categoría: Comida."), "Comida")
-        self.assertEqual(clean_category("categoría: transporte"), "Transporte")
-        self.assertEqual(clean_category("vivienda."), "Vivienda")
+        self.assertEqual(category_matched_with_id("Categoría: Comida."), "Comida")
+        self.assertEqual(category_matched_with_id("categoría: transporte"), "Transporte")
+        self.assertEqual(category_matched_with_id("vivienda."), "Vivienda")
 
         # Prueba de una categoría no permitida
         with self.assertRaises(ValueError):
-            clean_category("Categoría: Viajes.")
+            category_matched_with_id("Categoría: Viajes.")
 
 
 if __name__ == "__main__":
