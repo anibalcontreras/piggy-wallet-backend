@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .serializers import DebtSerializer, UserDebtSerializer
+from .serializers import DebtSerializer, UserDebtSerializer, UnpaidDebtsHistorySerializer
 from .models import Debt
 from django.contrib.auth import get_user_model
 from authentication.decorators import cognito_authenticated
@@ -13,7 +13,7 @@ from .services.debt_services import (
     calculate_balance,
     settle_debts,
     toggle_debt_payment,
-    get_debt_history,
+    get_unpaid_debts_by_week,
 )
 
 User = get_user_model()
@@ -74,9 +74,15 @@ class DebtViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
 
     @cognito_authenticated
-    @action(detail=False, methods=["get"], url_path="history/(?P<other_user_id>[^/.]+)")
-    def history(self, request, other_user_id=None):
+    @action(detail=False, methods=["get"], url_path="unpaid-history/(?P<other_user_id>[^/.]+)")
+    def unpaid_history(self, request, other_user_id=None):
         user_id = get_user_id_from_token(request)
-        debts = get_debt_history(user_id, other_user_id)
-        serializer = DebtSerializer(debts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        present_week_debts, last_week_debts, previous_debts = get_unpaid_debts_by_week(user_id)
+
+        response_data = {
+            "present_week": UnpaidDebtsHistorySerializer(present_week_debts, many=True).data,
+            "last_week": UnpaidDebtsHistorySerializer(last_week_debts, many=True).data,
+            "previous_weeks": UnpaidDebtsHistorySerializer(previous_debts, many=True).data,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)

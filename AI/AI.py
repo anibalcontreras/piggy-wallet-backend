@@ -3,17 +3,28 @@ import openai
 import os
 from textwrap import dedent
 from dotenv import load_dotenv
+from categories.models import Category
 
 
-def setup_api_key():
-    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
-    load_dotenv(dotenv_path=env_path)
-    openai.api_key = os.getenv("OPENAI_KEY")
+GPT_MODEL = "gpt-4-turbo"
+
+
+def get_category_name_from_description(description):
+    classified_category = classify_text(description)
+    cleaned_category = category_matched_with_id(classified_category)
+
+    if not Category.objects.filter(name=cleaned_category).exists():
+        raise ValueError("Categoría no encontrada.")
+    return cleaned_category
 
 
 def classify_text(texto):
+    setup_api_key()
+    if not openai.api_key:
+        raise ValueError("OpenAI API key is not set. Please check your .env file.")
+
     response = openai.ChatCompletion.create(
-        model="gpt-4-turbo",
+        model=GPT_MODEL,
         messages=[
             {
                 "role": "system",
@@ -43,7 +54,13 @@ def classify_text(texto):
     return category
 
 
-def clean_category(category):
+def setup_api_key():
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    load_dotenv(dotenv_path=env_path)
+    openai.api_key = os.getenv("OPENAI_KEY")
+
+
+def category_matched_with_id(category):
     if category.lower().startswith("categoría: "):
         category = category[11:]
     if category.endswith("."):

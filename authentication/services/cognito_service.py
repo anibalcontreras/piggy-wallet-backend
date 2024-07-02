@@ -4,6 +4,7 @@ import hmac
 import hashlib
 import base64
 from django.contrib.auth import get_user_model
+from user_expense_type.models import UserExpenseType
 
 
 class CognitoService:
@@ -38,6 +39,10 @@ class CognitoService:
             User.objects.create_user(
                 username=email, email=email, password=password, first_name=name, phone=phone, user_id=cognito_uuid
             )
+            user_expense_type = UserExpenseType.objects.create(
+                username=cognito_uuid, set_by_user=False, name="Personal"
+            )
+            user_expense_type.save()
             return response
         except ClientError as e:
             raise e

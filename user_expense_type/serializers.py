@@ -7,14 +7,14 @@ class UserExpenseTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserExpenseType
-        fields = "__all__"
+        fields = ["id", "username", "name", "description", "set_by_user"]
 
     def create(self, validated_data):
+        validated_data["set_by_user"] = True
         return UserExpenseType.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
         instance.description = validated_data.get("description", instance.description)
-        instance.set_by_user = validated_data.get("set_by_user", instance.set_by_user)
         instance.save()
         return instance

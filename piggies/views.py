@@ -45,11 +45,11 @@ class PiggiesViewSet(viewsets.ViewSet):
             piggies = Piggies.objects.filter(username=username)
             serializer = PiggiesSerializer(piggies, many=True)
             final_users = []
+            piggies_id = [str(pig["piggy"]) for pig in serializer.data]
 
-            for pig in serializer.data:
-                for user in filtered_users:
-                    if str(pig["piggy"]) == user["user_id"]:
-                        final_users.append(user)
+            for user in filtered_users:
+                if user["user_id"] in piggies_id:
+                    final_users.append(user)
 
             return Response(data=final_users)
         except Piggies.DoesNotExist:
@@ -101,7 +101,9 @@ class NotPiggiesViewSet(viewsets.ViewSet):
         try:
             username = self.get_user_id_from_token(request)
             User = get_user_model()
-            users = [{"user_id": str(x.user_id), "first_name": x.first_name} for x in User.objects.all()]
+            users = [
+                {"user_id": str(x.user_id), "first_name": x.first_name, "email": x.email} for x in User.objects.all()
+            ]
 
             filtered_users = []
 
@@ -116,11 +118,11 @@ class NotPiggiesViewSet(viewsets.ViewSet):
                 return Response(data=filtered_users)
 
             final_users = []
+            piggies_id = [str(pig["piggy"]) for pig in serializer.data]
 
-            for pig in serializer.data:
-                for user in filtered_users:
-                    if str(pig["piggy"]) != user["user_id"]:
-                        final_users.append(user)
+            for user in filtered_users:
+                if user["user_id"] not in piggies_id:
+                    final_users.append(user)
 
             return Response(data=final_users)
         except Exception as e:
