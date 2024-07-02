@@ -8,12 +8,13 @@ from bankcard.models import BankCard
 
 class ExpenseSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    username = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
+    username = serializers.UUIDField()
     user_expense_type = serializers.PrimaryKeyRelatedField(queryset=UserExpenseType.objects.all(), required=False)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     bankcard_id = serializers.PrimaryKeyRelatedField(queryset=BankCard.objects.all())
     amount = serializers.IntegerField()
     description = serializers.CharField(max_length=255, allow_blank=True, allow_null=True)
+    created_at = serializers.DateTimeField(read_only=True)
 
     def validate(self, data):
         user_expense_type = data.get("user_expense_type")
