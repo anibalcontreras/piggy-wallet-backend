@@ -37,6 +37,16 @@ class ExpenseViewSet(viewsets.ViewSet):
         try:
             username = get_user_id_from_token(request)
             expenses = Expense.objects.filter(username=username)
+
+            start_date = request.query_params.get("start_date")
+            end_date = request.query_params.get("end_date")
+
+            if start_date and end_date:
+                expenses = expenses.filter(created_at__range=[start_date, end_date])
+            elif start_date:
+                expenses = expenses.filter(created_at__gte=start_date)
+            elif end_date:
+                expenses = expenses.filter(created_at__lte=end_date)
             serializer = ExpenseSerializer(expenses, many=True)
             return Response(serializer.data)
         except Expense.DoesNotExist:
