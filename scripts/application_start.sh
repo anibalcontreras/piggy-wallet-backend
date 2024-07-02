@@ -1,5 +1,5 @@
 # !/bin/bash
-cd /home/ubuntu/api
+cd /home/ubuntu/piggy-wallet-backend
 
 echo "Starting service ..."
-docker compose up -d
+sudo docker compose up -d --build

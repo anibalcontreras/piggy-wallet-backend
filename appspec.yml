@@ -4,7 +4,7 @@ os: linux
 # In this case we copy all the files of the project to the EC2
 files:
   - source: /
-    destination: /home/ubuntu/api
+    destination: /home/ubuntu/piggy-wallet-backend
 
 # If a file already exists in the destination, it will be OVERWRITTEN
 file_exists_behavior: OVERWRITE

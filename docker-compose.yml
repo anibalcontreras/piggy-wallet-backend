@@ -6,17 +6,21 @@ services:
     image: postgres:latest
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     networks:
       - app_network
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PORT: ${DB_PORT}
+      POSTGRES_HOST: ${DB_HOST}
 
   web:
     build:
       context: .
-      dockerfile: Dev.Dockerfile
+      dockerfile: Dockerfile
     container_name: web
     volumes:
       - .:/app
@@ -33,7 +37,7 @@ services:
       POSTGRES_PORT: ${DB_PORT}
       POSTGRES_HOST: ${DB_HOST}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      DJANGO_SETTINGS_MODULE: piggywallet.settings.dev
+      DJANGO_SETTINGS_MODULE: piggywallet.settings.prod
 
 networks:
   app_network:

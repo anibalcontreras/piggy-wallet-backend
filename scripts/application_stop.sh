@@ -1,5 +1,5 @@
 # !/bin/bash
-cd /home/ubuntu/api
+cd /home/ubuntu/piggy-wallet-backend
 
 echo "Stopping service ..."
-docker compose down
+sudo docker compose down
