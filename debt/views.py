@@ -77,7 +77,7 @@ class DebtViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="unpaid-history/(?P<other_user_id>[^/.]+)")
     def unpaid_history(self, request, other_user_id=None):
         user_id = get_user_id_from_token(request)
-        present_week_debts, last_week_debts, previous_debts = get_unpaid_debts_by_week(user_id)
+        present_week_debts, last_week_debts, previous_debts = get_unpaid_debts_by_week(user_id, other_user_id)
 
         response_data = {
             "present_week": UnpaidDebtsHistorySerializer(present_week_debts, many=True).data,

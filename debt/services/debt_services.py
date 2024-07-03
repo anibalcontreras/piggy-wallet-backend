@@ -2,6 +2,7 @@ from debt.models import Debt
 from django.contrib.auth import get_user_model
 from datetime import timedelta
 from django.utils import timezone
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -64,15 +65,22 @@ def toggle_debt_payment(debt_id):
         raise ValueError("Debt not found")
 
 
-def get_unpaid_debts_by_week(user_id):
+def get_unpaid_debts_by_week(user_id, piggy_id):
     now = timezone.now()
     start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
     start_of_last_week = start_of_week - timedelta(weeks=1)
 
-    present_week_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__gte=start_of_week)
-    last_week_debts = Debt.objects.filter(
-        user__user_id=user_id, is_paid=False, created_at__gte=start_of_last_week, created_at__lt=start_of_week
+    present_week_debts = Debt.objects.filter(
+        (Q(user__user_id=user_id) | Q(user__user_id=piggy_id)), is_paid=False, created_at__gte=start_of_week
     )
-    previous_debts = Debt.objects.filter(user__user_id=user_id, is_paid=False, created_at__lt=start_of_last_week)
+    last_week_debts = Debt.objects.filter(
+        (Q(user__user_id=user_id) | Q(user__user_id=piggy_id)),
+        is_paid=False,
+        created_at__gte=start_of_last_week,
+        created_at__lt=start_of_week,
+    )
+    previous_debts = Debt.objects.filter(
+        (Q(user__user_id=user_id) | Q(user__user_id=piggy_id)), is_paid=False, created_at__lt=start_of_last_week
+    )
 
     return present_week_debts, last_week_debts, previous_debts
