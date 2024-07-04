@@ -69,7 +69,7 @@ class BudgetViewSet(viewsets.ViewSet):
                 if serializer.is_valid():
                     serializer.save()
 
-                    return Response(data={"amount": serializer.data["amount"]}, status=status.HTTP_201_CREATED)
+                    return Response(data={"amount": serializer.data["amount"]})
 
                 return Response({"error": "Budget not found"}, status=status.HTTP_404_NOT_FOUND)
 
