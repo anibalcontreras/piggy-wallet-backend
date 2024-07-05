@@ -10,9 +10,19 @@ from authentication.services.cognito_service import CognitoService
 class ExpenseViewSetTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username="test@email.com", email="test@email.com", password="TestPassword1", first_name="Test User", user_id="389704ef-1e4f-4000-a801-bf887a1c88f2")
-        self.user_expense_type = UserExpenseType.objects.create(username="389704ef-1e4f-4000-a801-bf887a1c88f2", set_by_user=False, name="Personal")
-        self.bankcard = BankCard.objects.create(user_id=self.user, account_number=123456, bank_name="Test Bank", card_type="debit")
+        self.user = User.objects.create_user(
+            username="test@email.com",
+            email="test@email.com",
+            password="TestPassword1",
+            first_name="Test User",
+            user_id="389704ef-1e4f-4000-a801-bf887a1c88f2",
+        )
+        self.user_expense_type = UserExpenseType.objects.create(
+            username="389704ef-1e4f-4000-a801-bf887a1c88f2", set_by_user=False, name="Personal"
+        )
+        self.bankcard = BankCard.objects.create(
+            user_id=self.user, account_number=123456, bank_name="Test Bank", card_type="debit"
+        )
         self.expense_data = {
             "user_expense_type": self.user_expense_type.id,
             "category": 1,
