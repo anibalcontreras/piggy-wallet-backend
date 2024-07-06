@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from categories.models import Category
 from AI.AI import get_category_name_from_description
+from categories.exceptions import InvalidCategoryError
 
 
 def categorize_expense_description(data):
@@ -13,5 +14,7 @@ def categorize_expense_description(data):
             return data, None
         except ValueError as e:
             return None, Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except InvalidCategoryError as e:
+            return None, Response({"error": str(e)}, status=e.code)
     else:
         return None, Response({"error": "Description is required"}, status=status.HTTP_400_BAD_REQUEST)

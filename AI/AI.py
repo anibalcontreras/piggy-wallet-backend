@@ -4,6 +4,7 @@ import os
 from textwrap import dedent
 from dotenv import load_dotenv
 from categories.models import Category
+from categories.exceptions import InvalidCategoryError
 
 
 GPT_MODEL = "gpt-4-turbo"
@@ -77,5 +78,5 @@ def category_matched_with_id(category):
         "Inversión",
     ]
     if category not in categories_allowed:
-        raise ValueError(f"Categoría no permitida: {category}")
+        raise InvalidCategoryError(category)
     return category
