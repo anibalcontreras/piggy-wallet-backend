@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 from AI import classify_text, category_matched_with_id
 from textwrap import dedent
+from categories.exceptions import InvalidCategoryError
 
 
 class TestGastosClassifier(unittest.TestCase):
@@ -54,7 +55,7 @@ class TestGastosClassifier(unittest.TestCase):
         self.assertEqual(category_matched_with_id("vivienda."), "Vivienda")
 
         # Prueba de una categoría no permitida
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidCategoryError):
             category_matched_with_id("Categoría: Viajes.")
 
 
