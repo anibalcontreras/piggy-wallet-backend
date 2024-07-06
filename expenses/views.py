@@ -36,7 +36,7 @@ class ExpenseViewSet(viewsets.ViewSet):
     def list(self, request):
         try:
             username = get_user_id_from_token(request)
-            expenses = Expense.objects.filter(username=username)
+            expenses = Expense.objects.filter(username=username).order_by("-created_at")
 
             start_date = request.query_params.get("start_date")
             end_date = request.query_params.get("end_date")
