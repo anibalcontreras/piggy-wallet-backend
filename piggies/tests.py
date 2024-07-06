@@ -29,7 +29,6 @@ class PiggiesViewSetTestCase(APITestCase):
             user_id="389704ef-1e4f-4000-a801-bf887a1c88f4",
         )
         self.piggies_data = {
-            "username": self.user.user_id,
             "piggy": self.piggy.user_id,
         }
 
