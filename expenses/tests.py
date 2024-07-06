@@ -1,135 +1,118 @@
-from django.test import TestCase
-from unittest.mock import patch
-from rest_framework.test import APIClient
+from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from unittest.mock import patch
+from authentication.models import User
+from user_expense_type.models import UserExpenseType
+from bankcard.models import BankCard
 from authentication.services.cognito_service import CognitoService
-from rest_framework.response import Response
-from .views import ExpenseViewSet, ExpenseGroupedByTypeAndCategoryViewSet
 
 
-class ExpenseViewSetTestCase(TestCase):
+class ExpenseViewSetTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
-        self.view = ExpenseViewSet()
-        self.expense = {
-            "user_expense_type": 1,
+        self.user = User.objects.create_user(
+            username="test@email.com",
+            email="test@email.com",
+            password="TestPassword1",
+            first_name="Test User",
+            user_id="389704ef-1e4f-4000-a801-bf887a1c88f2",
+        )
+        self.user_expense_type = UserExpenseType.objects.create(
+            username="389704ef-1e4f-4000-a801-bf887a1c88f2", set_by_user=False, name="Personal"
+        )
+        self.bankcard = BankCard.objects.create(
+            user_id=self.user, account_number=123456, bank_name="Test Bank", card_type="debit"
+        )
+        self.expense_data = {
+            "user_expense_type": self.user_expense_type.id,
             "category": 1,
-            "bankcard_id": 1,
+            "bankcard_id": self.bankcard.id,
             "amount": 100,
+            "description": "Test description",
+            "username": "389704ef-1e4f-4000-a801-bf887a1c88f2",
         }
 
-    @patch.object(ExpenseViewSet, "create")
-    @patch.object(CognitoService, "login_user")
-    def test_create(self, mock_login_user, mock_create):
-        mock_login_user.return_value = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
-        }
-        mock_create.return_value = Response(status=status.HTTP_201_CREATED, data=self.expense)
+    @patch("authentication.decorators.get_user_id_from_token")
+    @patch("expenses.views.categorize_expense_description")
+    @patch("expenses.views.get_user_id_from_token")
+    def test_create(self, mock_get_user_id, mock_categorize, mock_auth_get_user_id):
+        mock_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
+        mock_categorize.return_value = self.expense_data, None
+        mock_auth_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
 
-        request = self.client.post("/expenses/", self.expense)
-        request.headers["Authorization"] = "Bearer mock_access_token"
-
-        response = self.client.post("/expenses/", self.expense)
+        response = self.client.post("/expenses/", self.expense_data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["amount"], 100)
 
-    @patch.object(ExpenseViewSet, "list")
-    @patch.object(CognitoService, "login_user")
-    def test_list(self, mock_login_user, mock_list):
-        mock_login_user.return_value = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
-        }
-        mock_list.return_value = Response(status=status.HTTP_200_OK, data=self.expense)
+    @patch("authentication.decorators.get_user_id_from_token")
+    @patch("expenses.views.categorize_expense_description")
+    @patch("expenses.views.get_user_id_from_token")
+    def test_list(self, mock_get_user_id, mock_categorize, mock_auth_get_user_id):
+        mock_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
+        mock_categorize.return_value = self.expense_data, None
+        mock_auth_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
 
-        request = self.client.get("/expenses/")
-        request.headers["Authorization"] = "Bearer mock_access_token"
-
+        response = self.client.post("/expenses/", self.expense_data)
+        response = self.client.post("/expenses/", self.expense_data)
         response = self.client.get("/expenses/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["amount"], 100)
+        self.assertEqual(len(response.data), 2)
 
-    @patch.object(ExpenseViewSet, "retrieve")
-    @patch.object(CognitoService, "login_user")
-    def test_retrieve(self, mock_login_user, mock_retrieve):
-        mock_login_user.return_value = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
-        }
-        mock_retrieve.return_value = Response(status=status.HTTP_200_OK, data=self.expense)
+    @patch("authentication.decorators.get_user_id_from_token")
+    @patch("expenses.views.categorize_expense_description")
+    @patch("expenses.views.get_user_id_from_token")
+    def test_retrieve(self, mock_get_user_id, mock_categorize, mock_auth_get_user_id):
+        mock_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
+        mock_categorize.return_value = self.expense_data, None
+        mock_auth_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
 
-        request = self.client.get("/expenses/1/")
-        request.headers["Authorization"] = "Bearer mock_access_token"
-
-        response = self.client.get("/expenses/1/")
+        response = self.client.post("/expenses/", self.expense_data)
+        response = self.client.get(f"/expenses/{response.data['id']}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["amount"], 100)
 
-    @patch.object(ExpenseViewSet, "destroy")
-    @patch.object(CognitoService, "login_user")
-    def test_destroy(self, mock_login_user, mock_destroy):
-        mock_login_user.return_value = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
-        }
-        mock_destroy.return_value = Response(status=status.HTTP_204_NO_CONTENT)
+    @patch("authentication.decorators.get_user_id_from_token")
+    @patch("expenses.views.categorize_expense_description")
+    @patch("expenses.views.get_user_id_from_token")
+    def test_update(self, mock_get_user_id, mock_categorize, mock_auth_get_user_id):
+        mock_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
+        mock_categorize.return_value = self.expense_data, None
+        mock_auth_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
 
-        request = self.client.delete("/expenses/1/")
-        request.headers["Authorization"] = "Bearer mock_access_token"
-
-        response = self.client.delete("/expenses/1/")
-
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-    @patch.object(ExpenseViewSet, "partial_update")
-    @patch.object(CognitoService, "login_user")
-    def test_partial_update(self, mock_login_user, mock_partial_update):
-        mock_login_user.return_value = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
-        }
-        new_expense = {
-            "expense_type": 1,
-            "category": 1,
-            "bankcard_id": 1,
-            "amount": 200,
-        }
-        mock_partial_update.return_value = Response(status=status.HTTP_200_OK, data=new_expense)
-
-        request = self.client.put("/expenses/1/", {"amount": 200})
-        request.headers["Authorization"] = "Bearer mock_access_token"
-
-        response = self.client.put("/expenses/1/", {"amount": 200})
+        response = self.client.post("/expenses/", self.expense_data)
+        response = self.client.put(f"/expenses/{response.data['id']}/", {"amount": 200})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["amount"], 200)
 
+    @patch("authentication.decorators.get_user_id_from_token")
+    @patch("expenses.views.categorize_expense_description")
+    @patch("expenses.views.get_user_id_from_token")
+    def test_delete(self, mock_get_user_id, mock_categorize, mock_auth_get_user_id):
+        mock_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
+        mock_categorize.return_value = self.expense_data, None
+        mock_auth_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
 
-class ExpenseGroupedByTypeAndCategoryViewSetTestCase(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.view = ExpenseGroupedByTypeAndCategoryViewSet()
-        self.expense = {
-            "expense_type": 1,
-            "category": 1,
-            "bankcard_id": 1,
-            "amount": 100,
-        }
-        self.expenses_grouped = {"Personal": {"Comida": 100}}
+        response = self.client.post("/expenses/", self.expense_data)
+        response = self.client.delete(f"/expenses/{response.data['id']}/")
 
-    @patch.object(ExpenseGroupedByTypeAndCategoryViewSet, "list")
-    @patch.object(CognitoService, "login_user")
-    def test_list(self, mock_login_user, mock_list):
-        mock_login_user.return_value = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
-        }
-        mock_list.return_value = Response(status=status.HTTP_200_OK, data=self.expenses_grouped)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        request = self.client.get("/expenses/grouped/")
-        request.headers["Authorization"] = "Bearer mock_access_token"
+    @patch("authentication.decorators.get_user_id_from_token")
+    @patch("expenses.views.categorize_expense_description")
+    @patch("expenses.views.get_user_id_from_token")
+    def test_grouped(self, mock_get_user_id, mock_categorize, mock_auth_get_user_id):
+        mock_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
+        mock_categorize.return_value = self.expense_data, None
+        mock_auth_get_user_id.return_value = "389704ef-1e4f-4000-a801-bf887a1c88f2"
 
+        response = self.client.post("/expenses/", self.expense_data)
+        response = self.client.post("/expenses/", self.expense_data)
         response = self.client.get("/expenses/grouped/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("Personal", response.data)
-        self.assertIn("Comida", response.data["Personal"])
-        self.assertEqual(response.data["Personal"]["Comida"], 100)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data["Personal"]["Comida"], 200)
