@@ -20,7 +20,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dev.Dockerfile
     container_name: web
     volumes:
       - .:/app
@@ -37,7 +37,7 @@ services:
       POSTGRES_PORT: ${DB_PORT}
       POSTGRES_HOST: ${DB_HOST}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      DJANGO_SETTINGS_MODULE: piggywallet.settings.prod
+      DJANGO_SETTINGS_MODULE: piggywallet.settings.dev
 
 networks:
   app_network:

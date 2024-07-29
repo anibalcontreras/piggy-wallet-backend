@@ -14,8 +14,8 @@ class CognitoService:
         self.app_client_id = app_client_id
         self.app_client_secret = app_client_secret
 
-    def get_secret_hash(self, email):
-        message = email + self.app_client_id
+    def get_secret_hash(self, message):
+        message = message + self.app_client_id
         dig = hmac.new(
             str(self.app_client_secret).encode("utf-8"), msg=str(message).encode("utf-8"), digestmod=hashlib.sha256
         ).digest()
@@ -56,6 +56,20 @@ class CognitoService:
                     "USERNAME": email,
                     "PASSWORD": password,
                     "SECRET_HASH": self.get_secret_hash(email),
+                },
+            )
+            return response
+        except ClientError as e:
+            raise e
+
+    def refresh_tokens(self, refresh_token, user_sub):
+        try:
+            response = self.client.initiate_auth(
+                ClientId=self.app_client_id,
+                AuthFlow="REFRESH_TOKEN_AUTH",
+                AuthParameters={
+                    "REFRESH_TOKEN": refresh_token,
+                    "SECRET_HASH": self.get_secret_hash(user_sub),
                 },
             )
             return response
