@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, RefreshTokenSerializer
 from .services.cognito_service import CognitoService
 from django.conf import settings
 from .models import User
@@ -44,13 +44,33 @@ class LoginView(APIView):
                 return Response(
                     {
                         "access_token": response["AuthenticationResult"]["AccessToken"],
-                        "id_token": response["AuthenticationResult"]["IdToken"],
+                        "refresh_token": response["AuthenticationResult"]["RefreshToken"],
                     },
                     status=status.HTTP_200_OK,
                 )
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RefreshTokenView(APIView):
+    def post(self, request):
+        serializer = RefreshTokenSerializer(data=request.data)
+        if serializer.is_valid():
+            refresh_token = serializer.validated_data["refresh_token"]
+            user_sub = serializer.validated_data["user_sub"]
+            try:
+                response = cognito_service.refresh_tokens(refresh_token, user_sub)
+                return Response(
+                    {
+                        "access_token": response["AuthenticationResult"]["AccessToken"],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfileView(APIView):

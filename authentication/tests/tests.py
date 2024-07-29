@@ -42,12 +42,12 @@ class LoginViewTests(TestCase):
     @patch.object(CognitoService, "login_user")
     def test_login_user_success(self, mock_login_user):
         mock_login_user.return_value = {
-            "AuthenticationResult": {"AccessToken": "mock_access_token", "IdToken": "mock_id_token"}
+            "AuthenticationResult": {"AccessToken": "mock_access_token", "RefreshToken": "mock_refresh_token"}
         }
         response = self.client.post(self.url, self.data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["access_token"], "mock_access_token")
-        self.assertEqual(response.data["id_token"], "mock_id_token")
+        self.assertEqual(response.data["refresh_token"], "mock_refresh_token")
 
     @patch.object(CognitoService, "login_user")
     def test_login_user_failure(self, mock_login_user):
